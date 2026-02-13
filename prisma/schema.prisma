@@ -1,0 +1,70 @@
+// NextAuth + UniBuddy – SQLite (use PostgreSQL in production if you prefer)
+// https://next-auth.js.org/adapters/prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id                 String    @id @default(cuid())
+  name               String?
+  email              String    @unique
+  emailVerified      DateTime?
+  image              String?
+  creditsBalance       Int       @default(5)
+  lastCreditsResetAt   DateTime?
+  interestedInPremium  Boolean   @default(false)
+  interestedInPro      Boolean   @default(false)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  accounts           Account[]
+  sessions           Session[]
+  testAttempts       TestAttempt[]
+}
+
+model TestAttempt {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  moduleId     String
+  moduleName   String
+  testType     String   // "mcq" | "short_form" | "long_form"
+  completedAt  DateTime @default(now())
+  resultData   String   // JSON: for mcq { questions, answers }; for written { score, maxScore, feedback }
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@id([identifier, token])
+}
