@@ -46,9 +46,9 @@ export function PricingSection() {
       <div className="text-center">
         <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">{t("dashboard.pricingTitle")}</h2>
       </div>
-      <div className="grid gap-8 md:grid-cols-3">
+      <div className="flex snap-x snap-mandatory gap-6 overflow-x-auto pb-2 scroll-smooth md:grid md:grid-cols-3 md:snap-none md:overflow-visible md:pb-0 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
         {/* Basic (free tier) */}
-        <Card className="relative flex flex-col">
+        <Card className="relative flex min-w-[85vw] shrink-0 flex-col snap-center first:ml-4 last:mr-4 md:min-w-0 md:first:ml-0 md:last:mr-0 md:snap-align-none">
           <CardHeader className="space-y-3 pb-2">
             <div className="mb-1 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/20">
               <BookOpen className="h-5 w-5" />
@@ -81,7 +81,7 @@ export function PricingSection() {
         </Card>
 
         {/* Premium - Coming soon */}
-        <Card className="relative flex flex-col overflow-visible">
+        <Card className="relative flex min-w-[85vw] shrink-0 flex-col snap-center overflow-visible first:ml-4 last:mr-4 md:min-w-0 md:first:ml-0 md:last:mr-0 md:snap-align-none">
           <div className="absolute -top-3 left-6 z-10">
             <span className="inline-flex items-center rounded-full border border-white/20 bg-gradient-to-r from-primary to-primary/80 px-4 py-1 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20">
               {t("dashboard.comingSoon")}
@@ -130,7 +130,7 @@ export function PricingSection() {
         </Card>
 
         {/* Pro - Coming soon */}
-        <Card className="relative flex flex-col overflow-visible">
+        <Card className="relative flex min-w-[85vw] shrink-0 flex-col snap-center overflow-visible first:ml-4 last:mr-4 md:min-w-0 md:first:ml-0 md:last:mr-0 md:snap-align-none">
           <div className="absolute -top-3 left-6 z-10">
             <span className="inline-flex items-center rounded-full border border-white/20 bg-gradient-to-r from-primary to-primary/80 px-4 py-1 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20">
               {t("dashboard.comingSoon")}

@@ -38,6 +38,10 @@ export default function DashboardPage() {
     <div className="space-y-20">
       <section className="flex flex-col gap-8 lg:flex-row lg:items-center lg:gap-12">
         <div className="min-w-0 flex-1 space-y-6">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-sm font-semibold text-primary shadow-sm md:px-5 md:py-2">
+            <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+            {t("dashboard.freeCreditsBadge")}
+          </span>
           <Punchline text={t("dashboard.punchline")} locale={locale} />
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
             {t("dashboard.heroTitle1")}

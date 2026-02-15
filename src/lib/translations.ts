@@ -14,6 +14,7 @@ export const translations: Record<
       whereNext: string;
       unlockedCreditsSignupBefore: string;
       unlockedCreditsSignupAfter: string;
+      freeCreditsBadge: string;
       myModules: string;
       myModulesDesc: string;
       openMyModules: string;
@@ -215,6 +216,7 @@ export const translations: Record<
       whereNext: "Where to go next",
       unlockedCreditsSignupBefore: "You just unlocked 5 credits ",
       unlockedCreditsSignupAfter: " by signing up!",
+      freeCreditsBadge: "5 free credits",
       myModules: "My Modules",
       myModulesDesc:
         "View your modules, take mock exams, or add a new one. All your quizzes in one place.",
@@ -423,6 +425,7 @@ export const translations: Record<
       whereNext: "Weiter geht's",
       unlockedCreditsSignupBefore: "Du hast gerade 5 Credits ",
       unlockedCreditsSignupAfter: " durch Anmelden freigeschaltet!",
+      freeCreditsBadge: "5 Gratis-Credits",
       myModules: "Meine Module",
       myModulesDesc:
         "Module ansehen, Probeklausuren schreiben oder ein neues anlegen. Alle Quizzes an einem Ort.",

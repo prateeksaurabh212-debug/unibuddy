@@ -10,6 +10,7 @@ import { LocaleProvider } from "@/contexts/LocaleContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { DashboardHeaderUser } from "@/components/dashboard-header-user";
 import { Logo } from "@/components/logo";
+import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 
 export default function DashboardLayout({
   children,
@@ -51,7 +52,8 @@ export default function DashboardLayout({
               <DashboardHeaderUser />
             </div>
           </header>
-          <div className="flex-1 bg-grid-subtle px-4 py-4 md:py-6">{children}</div>
+          <div className="flex-1 bg-grid-subtle px-4 py-4 pb-24 md:py-6 md:pb-6">{children}</div>
+          <MobileBottomNav />
         </SidebarInset>
       </SidebarProvider>
     </LocaleProvider>
