@@ -2,8 +2,15 @@ import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "@/lib/prisma";
 
+// On Vercel, env vars are only available to deployments built *after* they were added.
+// Fallback so Preview deployments get a URL when NEXTAUTH_URL isn’t set for that environment.
+const nextAuthUrl =
+  process.env.NEXTAUTH_URL ||
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined);
+
 export const authOptions = {
   trustHost: true,
+  ...(nextAuthUrl ? { url: nextAuthUrl } : {}),
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,

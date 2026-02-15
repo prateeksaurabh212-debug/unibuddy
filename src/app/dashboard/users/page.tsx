@@ -13,19 +13,39 @@ export default async function DashboardUsersPage() {
     redirect("/dashboard");
   }
 
-  const users = await prisma.user.findMany({
-    orderBy: { createdAt: "desc" },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      image: true,
-      createdAt: true,
-      creditsBalance: true,
-      interestedInPremium: true,
-      interestedInPro: true,
-    },
-  });
+  let users: Awaited<ReturnType<typeof prisma.user.findMany>>;
+  try {
+    users = await prisma.user.findMany({
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        image: true,
+        createdAt: true,
+        creditsBalance: true,
+        interestedInPremium: true,
+        interestedInPro: true,
+      },
+    });
+  } catch (err) {
+    console.error("[Dashboard Users] prisma.user.findMany failed:", err);
+    return (
+      <div className="space-y-6">
+        <h1 className="text-2xl font-semibold tracking-tight">Users (email list)</h1>
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-destructive">
+              Could not load users. This is often a database connection issue on the server. Check Vercel logs (Deployments → your deployment → Functions / Runtime Logs) for details.
+            </p>
+            <p className="mt-2 text-muted-foreground text-sm">
+              Error: {err instanceof Error ? err.message : String(err)}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

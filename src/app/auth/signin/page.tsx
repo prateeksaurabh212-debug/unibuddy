@@ -6,6 +6,12 @@ import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 
+function getRedirectUriHint(): string {
+  if (typeof window === "undefined") return "";
+  const origin = window.location.origin;
+  return `${origin}/api/auth/callback/google`;
+}
+
 const ERROR_MESSAGES: Record<string, string> = {
   Configuration: "Server configuration error. Check NEXTAUTH_URL and Google OAuth settings.",
   AccessDenied: "Access denied.",
@@ -57,7 +63,7 @@ function SignInContent() {
           </Button>
         </form>
         <p className="text-muted-foreground text-xs">
-          Open the app at <strong>http://localhost:3000</strong> (not 127.0.0.1). In Google Cloud Console, set redirect URI to http://localhost:3000/api/auth/callback/google
+          In Google Cloud Console, add this exact redirect URI: <strong className="break-all">{getRedirectUriHint() || "…/api/auth/callback/google"}</strong>
         </p>
       </div>
     </div>

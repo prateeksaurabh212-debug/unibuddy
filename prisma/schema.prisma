@@ -1,4 +1,4 @@
-// NextAuth + UniBuddy – SQLite (use PostgreSQL in production if you prefer)
+// NextAuth + UniBuddy – PostgreSQL (Vercel) / SQLite (local dev optional)
 // https://next-auth.js.org/adapters/prisma
 
 generator client {
@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 model User {
