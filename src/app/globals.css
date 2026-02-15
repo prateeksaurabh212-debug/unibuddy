@@ -54,7 +54,7 @@
 }
 
 @layer base {
-  /* StudyBuddy brand: black + red, high contrast */
+  /* ExamPal brand: black + red, high contrast */
   :root {
     --background: 0 0% 0%;
     --foreground: 0 0% 100%;

@@ -195,7 +195,7 @@ export const translations: Record<
 > = {
   en: {
     sidebar: {
-      navUnibuddy: "StudyBuddy",
+      navUnibuddy: "ExamPal",
       navNavigate: "Navigate",
       dashboard: "Dashboard",
       home: "Home",
@@ -403,7 +403,7 @@ export const translations: Record<
   },
   de: {
     sidebar: {
-      navUnibuddy: "StudyBuddy",
+      navUnibuddy: "ExamPal",
       navNavigate: "Navigation",
       dashboard: "Dashboard",
       home: "Start",

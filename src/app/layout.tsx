@@ -16,7 +16,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "StudyBuddy – AI survival toolkit for international students in Germany",
+  title: "ExamPal – AI survival toolkit for international students in Germany",
   description: "AI survival toolkit for international students in Germany. Practice exams and decode official letters.",
 };
 

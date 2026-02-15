@@ -9,7 +9,7 @@ export default function NotFound() {
         The page you’re looking for doesn’t exist or has been moved.
       </p>
       <Button asChild>
-        <Link href="/">Go to StudyBuddy</Link>
+        <Link href="/">Go to ExamPal</Link>
       </Button>
     </div>
   );
