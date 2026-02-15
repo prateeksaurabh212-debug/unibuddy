@@ -17,10 +17,10 @@ function createPrisma(): PrismaClient {
     return extended as unknown as PrismaClient;
   }
 
-  const options: ConstructorParameters<typeof PrismaClient>[0] = {
+  const options = {
     log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
-  };
-  if (dbUrl) options.datasourceUrl = dbUrl;
+    ...(dbUrl && { datasourceUrl: dbUrl }),
+  } as ConstructorParameters<typeof PrismaClient>[0];
   return new PrismaClient(options);
 }
 
