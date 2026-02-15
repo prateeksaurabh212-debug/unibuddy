@@ -84,8 +84,8 @@ export function PricingSection() {
 
           {/* Premium - Coming soon */}
           <Card className="pricing-carousel-card relative flex shrink-0 flex-col overflow-visible lg:shrink">
-          <div className="absolute -top-3 left-6 z-10">
-            <span className="inline-flex items-center rounded-full border border-white/20 bg-gradient-to-r from-primary to-primary/80 px-4 py-1 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20">
+          <div className="absolute -top-3 left-4 right-4 z-10 flex justify-center sm:left-6 sm:right-auto sm:justify-start">
+            <span className="inline-flex shrink-0 items-center rounded-full border border-white/20 bg-gradient-to-r from-primary to-primary/80 px-5 py-1.5 text-xs font-semibold text-primary-foreground shadow-lg shadow-primary/20 whitespace-nowrap sm:text-sm sm:px-4 sm:py-1">
               {t("dashboard.comingSoon")}
             </span>
           </div>
@@ -133,8 +133,8 @@ export function PricingSection() {
 
           {/* Pro - Coming soon */}
           <Card className="pricing-carousel-card relative flex shrink-0 flex-col overflow-visible lg:shrink">
-          <div className="absolute -top-3 left-6 z-10">
-            <span className="inline-flex items-center rounded-full border border-white/20 bg-gradient-to-r from-primary to-primary/80 px-4 py-1 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20">
+          <div className="absolute -top-3 left-4 right-4 z-10 flex justify-center sm:left-6 sm:right-auto sm:justify-start">
+            <span className="inline-flex shrink-0 items-center rounded-full border border-white/20 bg-gradient-to-r from-primary to-primary/80 px-5 py-1.5 text-xs font-semibold text-primary-foreground shadow-lg shadow-primary/20 whitespace-nowrap sm:text-sm sm:px-4 sm:py-1">
               {t("dashboard.comingSoon")}
             </span>
           </div>
