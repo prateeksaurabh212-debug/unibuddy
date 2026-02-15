@@ -46,9 +46,11 @@ export function PricingSection() {
       <div className="text-center">
         <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">{t("dashboard.pricingTitle")}</h2>
       </div>
-      <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 scroll-smooth md:grid md:grid-cols-3 md:snap-none md:overflow-visible md:gap-8 md:pb-0 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
-        {/* Basic (free tier) - mobile: ~1.5 cards visible, snap to card start */}
-        <Card className="relative flex min-w-[68vw] shrink-0 flex-col snap-start first:ml-4 last:mr-4 md:min-w-0 md:first:ml-0 md:last:mr-0 md:snap-align-none">
+      {/* Mobile: full-bleed carousel so 1.5 cards visible; desktop: grid */}
+      <div className="-mx-4 md:mx-0">
+        <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 pl-4 scroll-smooth pr-4 md:grid md:grid-cols-3 md:snap-none md:overflow-visible md:gap-8 md:pb-0 md:px-0 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
+          {/* Basic (free tier) - mobile: card ~64vw so 1.5 visible */}
+          <Card className="relative flex w-[64vw] min-w-[64vw] max-w-[64vw] shrink-0 flex-col snap-start md:w-auto md:min-w-0 md:max-w-none md:snap-align-none">
           <CardHeader className="min-w-0 space-y-3 pb-2">
             <div className="mb-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/20">
               <BookOpen className="h-5 w-5" />
@@ -80,8 +82,8 @@ export function PricingSection() {
           </CardContent>
         </Card>
 
-        {/* Premium - Coming soon */}
-        <Card className="relative flex min-w-[68vw] shrink-0 flex-col snap-start overflow-visible first:ml-4 last:mr-4 md:min-w-0 md:first:ml-0 md:last:mr-0 md:snap-align-none">
+          {/* Premium - Coming soon */}
+          <Card className="relative flex w-[64vw] min-w-[64vw] max-w-[64vw] shrink-0 flex-col snap-start overflow-visible md:w-auto md:min-w-0 md:max-w-none md:snap-align-none">
           <div className="absolute -top-3 left-6 z-10">
             <span className="inline-flex items-center rounded-full border border-white/20 bg-gradient-to-r from-primary to-primary/80 px-4 py-1 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20">
               {t("dashboard.comingSoon")}
@@ -129,8 +131,8 @@ export function PricingSection() {
           </CardContent>
         </Card>
 
-        {/* Pro - Coming soon */}
-        <Card className="relative flex min-w-[68vw] shrink-0 flex-col snap-start overflow-visible first:ml-4 last:mr-4 md:min-w-0 md:first:ml-0 md:last:mr-0 md:snap-align-none">
+          {/* Pro - Coming soon */}
+          <Card className="relative flex w-[64vw] min-w-[64vw] max-w-[64vw] shrink-0 flex-col snap-start overflow-visible md:w-auto md:min-w-0 md:max-w-none md:snap-align-none">
           <div className="absolute -top-3 left-6 z-10">
             <span className="inline-flex items-center rounded-full border border-white/20 bg-gradient-to-r from-primary to-primary/80 px-4 py-1 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20">
               {t("dashboard.comingSoon")}
@@ -173,10 +175,11 @@ export function PricingSection() {
                 onClick={() => handleInterest("pro")}
               >
                 {loading === "pro" ? "…" : t("dashboard.imInterested")}
-              </Button>
-            )}
+            </Button>
+          )}
           </CardContent>
         </Card>
+        </div>
       </div>
     </section>
   );
