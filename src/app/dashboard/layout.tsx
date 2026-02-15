@@ -52,7 +52,7 @@ export default function DashboardLayout({
               <DashboardHeaderUser />
             </div>
           </header>
-          <div className="flex-1 bg-grid-subtle px-4 py-4 pb-[max(6rem,calc(6rem+env(safe-area-inset-bottom)))] md:py-6 md:pb-6">{children}</div>
+          <div className="flex min-h-0 flex-1 flex-col bg-grid-subtle px-4 py-4 pb-[max(6rem,calc(6rem+env(safe-area-inset-bottom)))] md:py-6 md:pb-6">{children}</div>
           <MobileBottomNav />
         </SidebarInset>
       </SidebarProvider>

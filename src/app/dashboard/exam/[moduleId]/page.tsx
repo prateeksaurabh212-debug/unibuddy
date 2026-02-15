@@ -309,10 +309,10 @@ export default function ExamPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-8rem)] flex-col gap-4">
+    <div className="flex h-full min-h-0 flex-col gap-3 md:h-[calc(100vh-8rem)] md:min-h-[28rem]">
       {/* Only questions and options visible during the test */}
-      <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 overflow-hidden">
-        <div className="flex items-center justify-between">
+      <div className="mx-auto flex w-full max-w-2xl flex-1 min-h-0 flex-col gap-3 overflow-hidden">
+        <div className="flex shrink-0 items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             {startTime && (
               <ExamCountdown
@@ -334,9 +334,9 @@ export default function ExamPage() {
           </Button>
         </div>
 
-        <Card className="flex flex-1 flex-col overflow-hidden">
-          <CardHeader>
-            <CardTitle className="text-base">{q.question}</CardTitle>
+        <Card className="flex min-h-0 flex-1 flex-shrink flex-col overflow-hidden">
+          <CardHeader className="shrink-0">
+            <CardTitle className="text-base break-words">{q.question}</CardTitle>
             {q.correctIndices.length > 1 && (
               <p className="text-muted-foreground text-xs font-normal">
                 {t("exam.chooseAllCorrect")}
@@ -346,7 +346,7 @@ export default function ExamPage() {
               <CardDescription>{t("exam.selectOne")}</CardDescription>
             )}
           </CardHeader>
-          <CardContent className="flex flex-1 flex-col gap-2 overflow-auto">
+          <CardContent className="flex min-h-0 flex-1 flex-col gap-2 overflow-auto">
             {q.options.map((opt) => {
               const isSelected = selected.includes(opt.index);
               const isMultiple = q.correctIndices.length > 1;
@@ -371,44 +371,46 @@ export default function ExamPage() {
                   >
                     {isSelected ? <Check className="h-3 w-3" /> : null}
                   </span>
-                  <span className="text-sm">{opt.text}</span>
+                  <span className="min-w-0 flex-1 break-words text-sm">{opt.text}</span>
                 </button>
               );
             })}
           </CardContent>
         </Card>
 
-        <div className="flex items-center justify-between gap-2">
-          <Button variant="outline" onClick={prev} disabled={currentIndex === 0}>
-            <ChevronLeft className="h-4 w-4" />
-            {t("exam.previous")}
+        <div className="flex shrink-0 items-center justify-between gap-2">
+          <Button variant="outline" size="sm" className="shrink-0" onClick={prev} disabled={currentIndex === 0}>
+            <ChevronLeft className="h-4 w-4 md:mr-0.5" />
+            <span className="hidden sm:inline">{t("exam.previous")}</span>
           </Button>
-          <div className="flex flex-wrap gap-1">
-            {questions.map((_, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => goTo(i)}
-                className={cn(
-                  "inline-flex h-8 w-8 items-center justify-center rounded text-xs transition-colors",
-                  i === currentIndex
-                    ? "bg-primary text-primary-foreground"
-                    : flagged.has(questions[i].id)
-                    ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
-                    : "bg-muted hover:bg-muted/80"
-                )}
-              >
-                {i + 1}
-              </button>
-            ))}
+          <div className="flex min-w-0 flex-1 justify-center overflow-x-auto py-1 md:flex-wrap md:justify-center md:overflow-visible">
+            <div className="flex flex-nowrap gap-1 md:flex-wrap md:justify-center">
+              {questions.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => goTo(i)}
+                  className={cn(
+                    "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded text-xs transition-colors md:h-8 md:w-8",
+                    i === currentIndex
+                      ? "bg-primary text-primary-foreground"
+                      : flagged.has(questions[i].id)
+                      ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
+                      : "bg-muted hover:bg-muted/80"
+                  )}
+                >
+                  {i + 1}
+                </button>
+              ))}
+            </div>
           </div>
           {currentIndex < questions.length - 1 ? (
-            <Button onClick={next}>
-              {t("exam.next")}
-              <ChevronRight className="ml-2 h-4 w-4" />
+            <Button size="sm" className="shrink-0" onClick={next}>
+              <span className="hidden sm:inline">{t("exam.next")}</span>
+              <ChevronRight className="h-4 w-4 sm:ml-2" />
             </Button>
           ) : (
-            <Button onClick={submit}>{t("exam.submit")}</Button>
+            <Button size="sm" className="shrink-0" onClick={submit}>{t("exam.submit")}</Button>
           )}
         </div>
       </div>
