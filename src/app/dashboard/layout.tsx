@@ -33,7 +33,7 @@ export default function DashboardLayout({
           <SidebarHeader className="border-b border-white/10 bg-sidebar/90 backdrop-blur-xl">
             <div className="flex items-center gap-2 px-4 py-3">
               <SidebarTrigger />
-              <Logo />
+              <Logo className="text-[1.3rem]" />
             </div>
           </SidebarHeader>
           <SidebarContent>
