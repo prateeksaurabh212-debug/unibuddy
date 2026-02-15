@@ -141,3 +141,33 @@
     background-attachment: fixed;
   }
 }
+
+/* Pricing carousel: 1.5 cards visible on mobile (not purged by Tailwind) */
+@media (max-width: 1023px) {
+  .pricing-carousel-track {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    width: 100%;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .pricing-carousel-track::-webkit-scrollbar {
+    display: none;
+  }
+  .pricing-carousel-card {
+    flex: 0 0 60vw;
+    min-width: 60vw;
+    max-width: 60vw;
+    scroll-snap-align: start;
+  }
+}
+@media (min-width: 1024px) {
+  .pricing-carousel-card {
+    flex: none;
+    min-width: 0;
+    max-width: none;
+  }
+}

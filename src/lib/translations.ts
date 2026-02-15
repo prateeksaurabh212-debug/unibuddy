@@ -45,6 +45,7 @@ export const translations: Record<
       imInterested: string;
       interestRecorded: string;
       currentPlan: string;
+      pricingSwipeHint: string;
     };
     modules: {
       title: string;
@@ -249,6 +250,7 @@ export const translations: Record<
       imInterested: "I'm Interested!",
       interestRecorded: "Your response was recorded. We will inform you when new plans are launched.",
       currentPlan: "Current plan",
+      pricingSwipeHint: "Swipe for more plans",
     },
     modules: {
       title: "My Modules",
@@ -458,6 +460,7 @@ export const translations: Record<
       imInterested: "Ich habe Interesse!",
       interestRecorded: "Deine Antwort wurde gespeichert. Wir informieren dich, wenn neue Pläne starten.",
       currentPlan: "Aktueller Plan",
+      pricingSwipeHint: "Wischen für weitere Pläne",
     },
     modules: {
       title: "Meine Module",
