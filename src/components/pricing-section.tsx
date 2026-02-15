@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { BookOpen, Zap, Crown, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,11 +8,34 @@ import { useLocale } from "@/contexts/LocaleContext";
 
 type PlanId = "free" | "premium" | "pro";
 
+const CAROUSEL_CARD_COUNT = 3;
+const MOBILE_CARD_VW = 0.6;
+const MOBILE_GAP_PX = 12;
+
 export function PricingSection() {
   const { t } = useLocale();
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [activeDot, setActiveDot] = useState(0);
   const [interestedPremium, setInterestedPremium] = useState(false);
   const [interestedPro, setInterestedPro] = useState(false);
   const [loading, setLoading] = useState<PlanId | null>(null);
+
+  const updateActiveDot = useCallback(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    const cardWidthPx = el.clientWidth * MOBILE_CARD_VW;
+    const step = cardWidthPx + MOBILE_GAP_PX;
+    const index = Math.round(el.scrollLeft / step);
+    setActiveDot(Math.min(Math.max(0, index), CAROUSEL_CARD_COUNT - 1));
+  }, []);
+
+  const scrollToCard = useCallback((index: number) => {
+    const el = trackRef.current;
+    if (!el) return;
+    const cardWidthPx = el.clientWidth * MOBILE_CARD_VW;
+    const step = cardWidthPx + MOBILE_GAP_PX;
+    el.scrollTo({ left: index * step, behavior: "smooth" });
+  }, []);
 
   useEffect(() => {
     fetch("/api/interest-plan")
@@ -23,6 +46,18 @@ export function PricingSection() {
       })
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    updateActiveDot();
+    el.addEventListener("scroll", updateActiveDot);
+    window.addEventListener("resize", updateActiveDot);
+    return () => {
+      el.removeEventListener("scroll", updateActiveDot);
+      window.removeEventListener("resize", updateActiveDot);
+    };
+  }, [updateActiveDot]);
 
   async function handleInterest(plan: "premium" | "pro") {
     setLoading(plan);
@@ -48,7 +83,10 @@ export function PricingSection() {
       </div>
       {/* Mobile/tablet: full-bleed carousel; 60vw per card = 1 full + half of next visible. lg: grid */}
       <div className="-mx-4 lg:mx-0">
-        <div className="pricing-carousel-track gap-3 pb-2 pl-4 pr-4 lg:grid lg:grid-cols-3 lg:gap-8 lg:pb-0 lg:px-0">
+        <div
+          ref={trackRef}
+          className="pricing-carousel-track gap-3 pb-2 pl-4 pr-4 lg:grid lg:grid-cols-3 lg:gap-8 lg:pb-0 lg:px-0"
+        >
           {/* Basic - width from globals.css so 1.5 cards visible on mobile */}
           <Card className="pricing-carousel-card relative flex shrink-0 flex-col lg:shrink">
           <CardHeader className="min-w-0 space-y-3 pb-2">
@@ -180,7 +218,24 @@ export function PricingSection() {
           </CardContent>
         </Card>
         </div>
-        <p className="mt-2 text-center text-xs text-muted-foreground lg:hidden">{t("dashboard.pricingSwipeHint")}</p>
+        {/* Pagination dots + swipe hint (mobile only) */}
+        <div className="mt-3 flex flex-col items-center gap-2 lg:hidden">
+          <div className="flex items-center gap-2" aria-hidden>
+            {[0, 1, 2].map((i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => scrollToCard(i)}
+                className={`h-2 w-2 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+                  activeDot === i ? "bg-primary scale-125" : "bg-muted-foreground/40 hover:bg-muted-foreground/60"
+                }`}
+                aria-label={i === 0 ? t("dashboard.planFree") : i === 1 ? t("dashboard.planPremium") : t("dashboard.planPro")}
+                aria-current={activeDot === i ? "true" : undefined}
+              />
+            ))}
+          </div>
+          <p className="text-center text-xs text-muted-foreground">{t("dashboard.pricingSwipeHint")}</p>
+        </div>
       </div>
     </section>
   );

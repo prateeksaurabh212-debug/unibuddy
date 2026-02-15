@@ -16,7 +16,7 @@ export function MobileBottomNav() {
   const { t } = useLocale();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-30 flex items-center justify-around border-t border-white/10 bg-background/95 backdrop-blur-xl pb-[env(safe-area-inset-bottom)] pt-3 md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-30 flex items-center justify-around border-t border-white/10 bg-background/95 backdrop-blur-xl pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pl-[max(0.5rem,env(safe-area-inset-left))] pr-[max(0.5rem,env(safe-area-inset-right))] md:hidden">
       {navItems.map(({ href, icon: Icon, key }) => {
         const isActive =
           href === "/dashboard"

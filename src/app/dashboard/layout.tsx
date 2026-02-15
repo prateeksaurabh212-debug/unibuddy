@@ -42,7 +42,7 @@ export default function DashboardLayout({
           </SidebarContent>
         </Sidebar>
         <SidebarInset>
-          <header className="flex h-12 items-center justify-between gap-2 border-b border-white/10 bg-background/80 backdrop-blur-xl px-4">
+          <header className="flex h-12 items-center justify-between gap-2 border-b border-white/10 bg-background/80 backdrop-blur-xl px-4 pt-[env(safe-area-inset-top)]">
             <div className="flex min-w-0 flex-1 items-center gap-2 md:flex-initial md:flex-none">
               <SidebarTrigger className="md:hidden" />
               <Logo className="shrink-0 text-lg md:hidden" />
@@ -52,7 +52,7 @@ export default function DashboardLayout({
               <DashboardHeaderUser />
             </div>
           </header>
-          <div className="flex-1 bg-grid-subtle px-4 py-4 pb-24 md:py-6 md:pb-6">{children}</div>
+          <div className="flex-1 bg-grid-subtle px-4 py-4 pb-[max(6rem,calc(6rem+env(safe-area-inset-bottom)))] md:py-6 md:pb-6">{children}</div>
           <MobileBottomNav />
         </SidebarInset>
       </SidebarProvider>
