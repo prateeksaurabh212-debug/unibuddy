@@ -42,8 +42,11 @@ export default function DashboardLayout({
         </Sidebar>
         <SidebarInset>
           <header className="flex h-12 items-center justify-between gap-2 border-b border-white/10 bg-background/80 backdrop-blur-xl px-4">
-            <SidebarTrigger className="md:hidden" />
-            <div className="ml-auto flex items-center gap-2">
+            <div className="flex min-w-0 flex-1 items-center gap-2 md:flex-initial md:flex-none">
+              <SidebarTrigger className="md:hidden" />
+              <Logo className="shrink-0 text-lg md:hidden" />
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
               <LanguageSwitcher />
               <DashboardHeaderUser />
             </div>
