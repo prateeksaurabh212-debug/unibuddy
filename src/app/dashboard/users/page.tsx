@@ -13,7 +13,16 @@ export default async function DashboardUsersPage() {
     redirect("/dashboard");
   }
 
-  let users: Awaited<ReturnType<typeof prisma.user.findMany>>;
+  let users: Array<{
+    id: string;
+    name: string | null;
+    email: string;
+    image: string | null;
+    createdAt: Date;
+    creditsBalance: number;
+    interestedInPremium: boolean;
+    interestedInPro: boolean;
+  }>;
   try {
     users = await prisma.user.findMany({
       orderBy: { createdAt: "desc" },
