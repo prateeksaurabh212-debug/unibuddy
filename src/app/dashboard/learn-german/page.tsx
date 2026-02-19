@@ -15,10 +15,14 @@ const CREDITS: Record<(typeof LEVELS)[number], number> = {
   B2: 3,
 };
 
+type SyncResultItem = { level: string; count: number; error?: string; translated?: number };
+
 export default function LearnGermanPage() {
   const { t } = useLocale();
   const [syncing, setSyncing] = useState(false);
-  const [syncResult, setSyncResult] = useState<{ results?: { level: string; count: number; error?: string }[]; error?: string } | null>(null);
+  const [translateMissingLoading, setTranslateMissingLoading] = useState(false);
+  const [syncResult, setSyncResult] = useState<{ results?: SyncResultItem[]; error?: string } | null>(null);
+  const [translateResult, setTranslateResult] = useState<{ translated?: number; failed?: number; total?: number; error?: string } | null>(null);
 
   async function handleSyncFromPdfs() {
     setSyncing(true);
@@ -49,6 +53,32 @@ export default function LearnGermanPage() {
     }
   }
 
+  async function handleTranslateMissing() {
+    setTranslateMissingLoading(true);
+    setTranslateResult(null);
+    setSyncResult(null);
+    try {
+      const res = await fetch("/api/vocabulary/translate-missing", {
+        method: "POST",
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setTranslateResult({ error: data?.error ?? "Translate failed" });
+        return;
+      }
+      setTranslateResult({
+        translated: data.translated,
+        failed: data.failed,
+        total: data.total,
+      });
+    } catch {
+      setTranslateResult({ error: "Request failed. Check your connection." });
+    } finally {
+      setTranslateMissingLoading(false);
+    }
+  }
+
   return (
     <div className="mx-auto max-w-3xl space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -60,16 +90,25 @@ export default function LearnGermanPage() {
             {t("learnGerman.practiceVocabulary")}
           </p>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleSyncFromPdfs}
-          disabled={syncing}
-          className="shrink-0"
-        >
-          <RefreshCw className={`mr-2 h-4 w-4 ${syncing ? "animate-spin" : ""}`} />
-          {syncing ? "Syncing…" : "Sync from PDFs"}
-        </Button>
+        <div className="flex shrink-0 gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleSyncFromPdfs}
+            disabled={syncing || translateMissingLoading}
+          >
+            <RefreshCw className={`mr-2 h-4 w-4 ${syncing ? "animate-spin" : ""}`} />
+            {syncing ? "Syncing…" : "Sync from PDFs"}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleTranslateMissing}
+            disabled={syncing || translateMissingLoading}
+          >
+            {translateMissingLoading ? "Translating…" : "Translate missing"}
+          </Button>
+        </div>
       </div>
       {syncResult && (
         <Card className="border-primary/30">
@@ -80,10 +119,27 @@ export default function LearnGermanPage() {
               <ul className="text-sm text-muted-foreground">
                 {syncResult.results?.map((r) => (
                   <li key={r.level}>
-                    {r.level}: {r.error ?? `${r.count} words synced`}
+                    {r.level}: {r.error ?? `${r.count} words synced${r.translated != null ? `, ${r.translated} translated` : ""}`}
                   </li>
                 ))}
               </ul>
+            )}
+          </CardContent>
+        </Card>
+      )}
+      {translateResult && (
+        <Card className="border-primary/30">
+          <CardContent className="pt-4">
+            {translateResult.error ? (
+              <p className="text-sm text-destructive">{translateResult.error}</p>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                {translateResult.translated != null
+                  ? `Translated ${translateResult.translated} words.${translateResult.failed ? ` ${translateResult.failed} failed.` : ""}`
+                  : translateResult.total === 0
+                    ? "No words need translation."
+                    : ""}
+              </p>
             )}
           </CardContent>
         </Card>

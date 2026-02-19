@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import OpenAI from "openai";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -44,63 +43,6 @@ function shuffle<T>(arr: T[]): T[] {
   return out;
 }
 
-/** Translate German words to English via OpenAI. Returns German -> English map. */
-async function translateToEnglish(germanWords: string[]): Promise<Record<string, string>> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey?.trim() || germanWords.length === 0) return {};
-
-  try {
-    const openai = new OpenAI({ apiKey });
-    const prompt = `Translate each of these German words to English. Reply with only the English translations, one per line, in the same order. No numbering. Use a short phrase if needed (e.g. "to have", "of course").\n${germanWords.join("\n")}`;
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }],
-      max_tokens: 300,
-    });
-    const text = completion.choices[0]?.message?.content?.trim();
-    if (!text) return {};
-
-    const lines = text.split("\n").map((s) => s.replace(/^\d+[.)]\s*/, "").trim()).filter(Boolean);
-    const out: Record<string, string> = {};
-    germanWords.forEach((g, i) => {
-      out[g] = lines[i] ?? g;
-    });
-    return out;
-  } catch (e) {
-    console.warn("vocabulary translateToEnglish error:", e);
-    return {};
-  }
-}
-
-/** Get display form for each word: nouns as "der/die/das + Noun", otherwise the word unchanged. */
-async function getDisplayForms(germanWords: string[]): Promise<Record<string, string>> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey?.trim() || germanWords.length === 0) return {};
-
-  const unique = [...new Set(germanWords)];
-  try {
-    const openai = new OpenAI({ apiKey });
-    const prompt = `For each German word below, if it is a noun reply with the definite article and the word (e.g. "der Mann", "die Frau", "das Buch"). Use "der", "die", or "das" and capitalize the noun. If it is not a noun (verb, adjective, etc.) reply with the word unchanged. One per line, same order. No numbering.\n${unique.join("\n")}`;
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }],
-      max_tokens: 400,
-    });
-    const text = completion.choices[0]?.message?.content?.trim();
-    if (!text) return {};
-
-    const lines = text.split("\n").map((s) => s.replace(/^\d+[.)]\s*/, "").trim()).filter(Boolean);
-    const out: Record<string, string> = {};
-    unique.forEach((g, i) => {
-      out[g] = lines[i] ?? g;
-    });
-    return out;
-  } catch (e) {
-    console.warn("vocabulary getDisplayForms error:", e);
-    return {};
-  }
-}
-
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -132,9 +74,8 @@ export async function POST(req: Request) {
 
     let words = await prisma.vocabularyWord.findMany({
       where: { level },
-      select: { id: true, word: true },
+      select: { id: true, word: true, english: true, displayForm: true },
     });
-    // If build-time seed didn't run (e.g. env at deploy), seed this level on first use.
     if (words.length < 10) {
       const defaultWords = DEFAULT_VOCABULARY[level as (typeof LEVELS)[number]];
       if (defaultWords?.length >= 10) {
@@ -145,37 +86,28 @@ export async function POST(req: Request) {
           });
           words = await prisma.vocabularyWord.findMany({
             where: { level },
-            select: { id: true, word: true },
+            select: { id: true, word: true, english: true, displayForm: true },
           });
         } catch (seedErr) {
           console.error("vocabulary/start-quiz seed fallback error:", seedErr);
         }
       }
     }
-    if (words.length < 10) {
-      return NextResponse.json(
-        { error: `Not enough vocabulary for ${level}. Need at least 10 words. Add words via PDF upload or admin.` },
-        { status: 400 }
-      );
-    }
 
-    const shuffled = shuffle(words);
-    const selected = shuffled.slice(0, 10);
-    const rest = shuffled.slice(10);
-
-    const wordsToTranslate = selected.map((item) => item.word);
-    const translated = await translateToEnglish(wordsToTranslate);
-
-    const missing = wordsToTranslate.filter((w) => !translated[w] || translated[w] === w);
-    if (missing.length > 0) {
+    const withEnglish = words.filter((w): w is typeof w & { english: string } => w.english != null && w.english.trim() !== "");
+    if (withEnglish.length < 10) {
       return NextResponse.json(
         {
           error:
-            "Translation failed for some words. Set OPENAI_API_KEY and try again.",
+            "Not enough vocabulary translated for this level. Run Sync from PDFs (with OPENAI_API_KEY set) or Translate missing, then try again.",
         },
         { status: 400 }
       );
     }
+
+    const shuffled = shuffle(withEnglish);
+    const selected = shuffled.slice(0, 10);
+    const rest = shuffled.slice(10);
 
     const allOptionWords: string[] = [];
     const questionOptionWords: string[][] = [];
@@ -197,14 +129,18 @@ export async function POST(req: Request) {
       questionOptionWords.push(optionWords);
       allOptionWords.push(...optionWords);
     }
-    const displayForms = await getDisplayForms([...new Set(allOptionWords)]);
+
+    const displayFormByWord: Record<string, string> = {};
+    for (const row of shuffled) {
+      displayFormByWord[row.word] = row.displayForm ?? row.word;
+    }
 
     const questions = selected.map((item, index) => {
       const correctWord = item.word;
-      const promptEnglish = translated[correctWord]!;
+      const promptEnglish = item.english!;
       const optionWords = shuffle([...questionOptionWords[index]!]);
       const options = optionWords.map((word, optIndex) => ({
-        text: displayForms[word] ?? word,
+        text: displayFormByWord[word] ?? word,
         index: optIndex,
       }));
       const correctIndex = optionWords.indexOf(correctWord);

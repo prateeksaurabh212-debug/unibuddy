@@ -10,6 +10,7 @@ import { join } from "path";
 import { PDFParse } from "pdf-parse";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { translateAndStoreVocabulary } from "@/lib/vocabulary-translate";
 
 const LEVELS = ["A1", "A2", "B1", "B2"] as const;
 
@@ -62,7 +63,16 @@ export async function POST() {
           data: words.map((word) => ({ level, word })),
           skipDuplicates: true,
         });
-        results.push({ level, count: words.length });
+        const rows = await prisma.vocabularyWord.findMany({
+          where: { level },
+          select: { id: true, word: true },
+        });
+        const { translated } = await translateAndStoreVocabulary(rows);
+        results.push({
+          level,
+          count: words.length,
+          translated: translated > 0 ? translated : undefined,
+        });
       } catch (levelError) {
         console.error(`vocabulary/sync-from-pdfs ${level} error:`, levelError);
         results.push({
