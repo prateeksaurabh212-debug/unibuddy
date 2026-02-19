@@ -31,23 +31,28 @@ export default function LearnGermanPage() {
       const res = await fetch("/api/vocabulary/sync-from-pdfs", {
         method: "POST",
         credentials: "include",
-        headers: { "Content-Type": "application/json" },
       });
       const text = await res.text();
       let data: { results?: { level: string; count: number; error?: string }[]; error?: string };
       try {
         data = text ? JSON.parse(text) : {};
       } catch {
-        setSyncResult({ error: res.ok ? "Invalid response" : `Sync failed (${res.status}).` });
+        setSyncResult({
+          error: res.ok ? "Invalid response" : `Sync failed (${res.status}). ${text.slice(0, 200)}`,
+        });
         return;
       }
       if (!res.ok) {
-        setSyncResult({ error: data?.error ?? `Sync failed (${res.status})` });
+        setSyncResult({
+          error: data?.error ?? `Sync failed (${res.status}). ${text.slice(0, 200)}`,
+        });
         return;
       }
       setSyncResult(data);
-    } catch {
-      setSyncResult({ error: "Request failed. Check your connection." });
+    } catch (e) {
+      setSyncResult({
+        error: "Request failed. Check your connection.",
+      });
     } finally {
       setSyncing(false);
     }
