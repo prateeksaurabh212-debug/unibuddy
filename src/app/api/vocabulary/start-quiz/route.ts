@@ -11,6 +11,29 @@ const CREDITS: Record<(typeof LEVELS)[number], number> = {
   B2: 3,
 };
 
+/** Default vocabulary per level (same as prisma/seed.ts). Used to seed on first use if build-time seed didn't run. */
+const DEFAULT_VOCABULARY: Record<(typeof LEVELS)[number], string[]> = {
+  A1: [
+    "der", "die", "das", "und", "ist", "in", "ein", "eine", "haben", "werden",
+    "nicht", "mit", "sich", "auf", "für", "sind", "können", "auch", "nach", "noch",
+  ],
+  A2: [
+    "wenn", "nur", "oder", "sollen", "mehr", "schon", "dann", "werden", "sehr", "hier",
+    "immer", "gehen", "machen", "wollen", "stehen", "sehen", "kommen", "sagen", "geben", "nehmen",
+  ],
+  B1: [
+    "dadurch", "trotzdem", "deshalb", "allerdings", "eigentlich", "möglicherweise", "besonders", "genau",
+    "verstehen", "erklären", "entscheiden", "erwarten", "verbessern", "vergleichen", "beschreiben",
+    "erfolgreich", "wichtig", "persönlich", "politisch", "wirtschaftlich",
+  ],
+  B2: [
+    "voraussetzen", "berücksichtigen", "zusammenarbeiten", "weiterentwickeln", "überprüfen",
+    "Zusammenhang", "Entwicklung", "Möglichkeit", "Unterschied", "Erfahrung",
+    "anscheinend", "tatsächlich", "insbesondere", "selbstverständlich", "einschließlich",
+    "außerdem", "demzufolge", "hingegen", "andererseits", "folglich",
+  ],
+};
+
 function shuffle<T>(arr: T[]): T[] {
   const out = [...arr];
   for (let i = out.length - 1; i > 0; i--) {
@@ -56,10 +79,28 @@ export async function POST(req: Request) {
       );
     }
 
-    const words = await prisma.vocabularyWord.findMany({
+    let words = await prisma.vocabularyWord.findMany({
       where: { level },
       select: { id: true, word: true },
     });
+    // If build-time seed didn't run (e.g. env at deploy), seed this level on first use.
+    if (words.length < 10) {
+      const defaultWords = DEFAULT_VOCABULARY[level as (typeof LEVELS)[number]];
+      if (defaultWords?.length >= 10) {
+        try {
+          await prisma.vocabularyWord.createMany({
+            data: defaultWords.map((word) => ({ level, word })),
+            skipDuplicates: true,
+          });
+          words = await prisma.vocabularyWord.findMany({
+            where: { level },
+            select: { id: true, word: true },
+          });
+        } catch (seedErr) {
+          console.error("vocabulary/start-quiz seed fallback error:", seedErr);
+        }
+      }
+    }
     if (words.length < 10) {
       return NextResponse.json(
         { error: `Not enough vocabulary for ${level}. Need at least 10 words. Add words via PDF upload or admin.` },
