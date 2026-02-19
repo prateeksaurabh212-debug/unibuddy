@@ -49,7 +49,7 @@ export default function LearnGermanPage() {
         return;
       }
       setSyncResult(data);
-    } catch (e) {
+    } catch {
       setSyncResult({
         error: "Request failed. Check your connection.",
       });
