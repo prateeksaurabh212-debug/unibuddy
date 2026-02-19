@@ -44,7 +44,7 @@ function shuffle<T>(arr: T[]): T[] {
   return out;
 }
 
-/** Translate German words to English via OpenAI (for PDF-sourced words). Returns German -> English map. */
+/** Translate German words to English via OpenAI. Returns German -> English map. */
 async function translateToEnglish(germanWords: string[]): Promise<Record<string, string>> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey?.trim() || germanWords.length === 0) return {};
@@ -68,6 +68,35 @@ async function translateToEnglish(germanWords: string[]): Promise<Record<string,
     return out;
   } catch (e) {
     console.warn("vocabulary translateToEnglish error:", e);
+    return {};
+  }
+}
+
+/** Get display form for each word: nouns as "der/die/das + Noun", otherwise the word unchanged. */
+async function getDisplayForms(germanWords: string[]): Promise<Record<string, string>> {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey?.trim() || germanWords.length === 0) return {};
+
+  const unique = [...new Set(germanWords)];
+  try {
+    const openai = new OpenAI({ apiKey });
+    const prompt = `For each German word below, if it is a noun reply with the definite article and the word (e.g. "der Mann", "die Frau", "das Buch"). Use "der", "die", or "das" and capitalize the noun. If it is not a noun (verb, adjective, etc.) reply with the word unchanged. One per line, same order. No numbering.\n${unique.join("\n")}`;
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: prompt }],
+      max_tokens: 400,
+    });
+    const text = completion.choices[0]?.message?.content?.trim();
+    if (!text) return {};
+
+    const lines = text.split("\n").map((s) => s.replace(/^\d+[.)]\s*/, "").trim()).filter(Boolean);
+    const out: Record<string, string> = {};
+    unique.forEach((g, i) => {
+      out[g] = lines[i] ?? g;
+    });
+    return out;
+  } catch (e) {
+    console.warn("vocabulary getDisplayForms error:", e);
     return {};
   }
 }
@@ -148,31 +177,43 @@ export async function POST(req: Request) {
       );
     }
 
-    const questions = selected.map((item, index) => {
-      const correctWord = item.word;
-      const promptEnglish = translated[correctWord]!;
-      const others = rest
+    const allOptionWords: string[] = [];
+    const questionOptionWords: string[][] = [];
+    for (let i = 0; i < selected.length; i++) {
+      const correctWord = selected[i].word;
+      let othersList = rest
         .filter((w) => w.word !== correctWord)
         .slice(0, 3)
         .map((w) => w.word);
-      let othersList = others;
-      if (others.length < 3) {
-        othersList = [...others];
+      if (othersList.length < 3) {
         const pool = shuffled.filter((w) => w.word !== correctWord && !othersList.includes(w.word));
         while (othersList.length < 3 && pool.length > 0) {
           const extra = pool.find((w) => !othersList.includes(w.word));
-          if (extra) {
-            othersList.push(extra.word);
-          } else break;
+          if (extra) othersList.push(extra.word);
+          else break;
         }
       }
-      const options = shuffle([correctWord, ...othersList.slice(0, 3)]);
+      const optionWords = [correctWord, ...othersList.slice(0, 3)];
+      questionOptionWords.push(optionWords);
+      allOptionWords.push(...optionWords);
+    }
+    const displayForms = await getDisplayForms([...new Set(allOptionWords)]);
+
+    const questions = selected.map((item, index) => {
+      const correctWord = item.word;
+      const promptEnglish = translated[correctWord]!;
+      const optionWords = shuffle([...questionOptionWords[index]!]);
+      const options = optionWords.map((word, optIndex) => ({
+        text: displayForms[word] ?? word,
+        index: optIndex,
+      }));
+      const correctIndex = optionWords.indexOf(correctWord);
       return {
         id: `v-${level}-${index}-${item.id}`,
         word: correctWord,
         promptEnglish,
-        options: options.map((text, optIndex) => ({ text, index: optIndex })),
-        correctIndex: options.indexOf(correctWord),
+        options,
+        correctIndex,
       };
     });
 
