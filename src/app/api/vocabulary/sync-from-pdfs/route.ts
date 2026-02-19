@@ -34,7 +34,7 @@ export async function POST() {
     }
 
     const contentDir = join(process.cwd(), "content", "vocabulary");
-    const results: { level: string; count: number; error?: string }[] = [];
+    const results: { level: string; count: number; error?: string; translated?: number }[] = [];
 
     for (const level of LEVELS) {
       try {
