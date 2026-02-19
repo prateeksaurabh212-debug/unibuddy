@@ -35,42 +35,6 @@ const DEFAULT_VOCABULARY: Record<(typeof LEVELS)[number], string[]> = {
   ],
 };
 
-/** English meaning for default vocabulary (same order per level). Used for quiz prompt: "Select the German word for [English]". */
-const DEFAULT_ENGLISH: Record<(typeof LEVELS)[number], string[]> = {
-  A1: [
-    "the (m)", "the (f)", "the (n)", "and", "is", "in", "a/an (m/n)", "a/an (f)", "to have", "to become",
-    "not", "with", "oneself", "on", "for", "are", "can", "also", "after", "still",
-  ],
-  A2: [
-    "when/if", "only", "or", "should", "more", "already", "then", "to become", "very", "here",
-    "always", "to go", "to do/make", "to want", "to stand", "to see", "to come", "to say", "to give", "to take",
-  ],
-  B1: [
-    "through that", "nevertheless", "therefore", "however", "actually", "possibly", "especially", "exactly",
-    "to understand", "to explain", "to decide", "to expect", "to improve", "to compare", "to describe",
-    "successful", "important", "personal", "political", "economic",
-  ],
-  B2: [
-    "to assume", "to consider", "to work together", "to develop further", "to check",
-    "context", "development", "possibility", "difference", "experience",
-    "apparently", "actually", "in particular", "of course", "including",
-    "besides", "consequently", "whereas", "on the other hand", "therefore",
-  ],
-};
-
-/** German word → English (for quiz prompt). Built from DEFAULT_VOCABULARY + DEFAULT_ENGLISH. */
-const GERMAN_TO_ENGLISH: Record<string, string> = (() => {
-  const map: Record<string, string> = {};
-  for (const level of LEVELS) {
-    const words = DEFAULT_VOCABULARY[level];
-    const english = DEFAULT_ENGLISH[level];
-    words.forEach((w, i) => {
-      if (english[i]) map[w] = english[i];
-    });
-  }
-  return map;
-})();
-
 function shuffle<T>(arr: T[]): T[] {
   const out = [...arr];
   for (let i = out.length - 1; i > 0; i--) {
