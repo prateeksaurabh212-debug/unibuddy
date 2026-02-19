@@ -3,11 +3,23 @@
  * POST (authenticated). Requires OPENAI_API_KEY.
  */
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { translateAndStoreVocabulary } from "@/lib/vocabulary-translate";
+
+export async function OPTIONS(_req: NextRequest) {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Max-Age": "86400",
+    },
+  });
+}
 
 export async function POST() {
   try {

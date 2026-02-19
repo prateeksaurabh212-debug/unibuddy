@@ -3,7 +3,7 @@
  * Call POST /api/vocabulary/sync-from-pdfs (authenticated) after adding or updating those PDFs.
  */
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { readFileSync, existsSync } from "fs";
 import { join } from "path";
@@ -13,6 +13,19 @@ import { prisma } from "@/lib/prisma";
 import { translateAndStoreVocabulary } from "@/lib/vocabulary-translate";
 
 export const dynamic = "force-dynamic";
+
+/** Handle CORS preflight so POST with JSON can be sent. */
+export async function OPTIONS(_req: NextRequest) {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Max-Age": "86400",
+    },
+  });
+}
 
 const LEVELS = ["A1", "A2", "B1", "B2"] as const;
 
