@@ -77,7 +77,8 @@ export default function PastTestResultPage() {
   const isVocabulary = attempt.testType === "vocabulary";
 
   if (isVocabulary) {
-    let vData: { questions?: { id: string; word: string; correctIndices: number[] }; answers?: Record<string, number> };
+    type VocabQuestion = { id: string; word: string; correctIndices: number[] };
+    let vData: { questions?: VocabQuestion[]; answers?: Record<string, number> };
     try {
       vData = JSON.parse(attempt.resultData) as typeof vData;
     } catch {
@@ -90,7 +91,8 @@ export default function PastTestResultPage() {
         </div>
       );
     }
-    const vQuestions = vData.questions ?? [];
+    const rawQuestions = vData.questions;
+    const vQuestions: VocabQuestion[] = Array.isArray(rawQuestions) ? rawQuestions : [];
     const vAnswers = vData.answers ?? {};
     if (vQuestions.length === 0) {
       return (
