@@ -190,6 +190,7 @@ export const translations: Record<
       creditsCost: string;
       startQuiz: string;
       selectWord: string;
+      selectGermanFor: string;
       backToLevels: string;
       notEnoughCredits: string;
     };
@@ -418,6 +419,7 @@ export const translations: Record<
       creditsCost: "{{n}} credits",
       startQuiz: "Start quiz",
       selectWord: "Select the correct word",
+      selectGermanFor: "Select the German word for:",
       backToLevels: "Back to levels",
       notEnoughCredits: "Not enough credits for this quiz.",
     },
@@ -646,6 +648,7 @@ export const translations: Record<
       creditsCost: "{{n}} Credits",
       startQuiz: "Quiz starten",
       selectWord: "Wähle das richtige Wort",
+      selectGermanFor: "Wähle das deutsche Wort für:",
       backToLevels: "Zurück zu den Stufen",
       notEnoughCredits: "Nicht genug Credits für dieses Quiz.",
     },

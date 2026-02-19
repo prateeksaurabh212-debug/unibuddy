@@ -34,6 +34,42 @@ const DEFAULT_VOCABULARY: Record<(typeof LEVELS)[number], string[]> = {
   ],
 };
 
+/** English meaning for default vocabulary (same order per level). Used for quiz prompt: "Select the German word for [English]". */
+const DEFAULT_ENGLISH: Record<(typeof LEVELS)[number], string[]> = {
+  A1: [
+    "the (m)", "the (f)", "the (n)", "and", "is", "in", "a/an (m/n)", "a/an (f)", "to have", "to become",
+    "not", "with", "oneself", "on", "for", "are", "can", "also", "after", "still",
+  ],
+  A2: [
+    "when/if", "only", "or", "should", "more", "already", "then", "to become", "very", "here",
+    "always", "to go", "to do/make", "to want", "to stand", "to see", "to come", "to say", "to give", "to take",
+  ],
+  B1: [
+    "through that", "nevertheless", "therefore", "however", "actually", "possibly", "especially", "exactly",
+    "to understand", "to explain", "to decide", "to expect", "to improve", "to compare", "to describe",
+    "successful", "important", "personal", "political", "economic",
+  ],
+  B2: [
+    "to assume", "to consider", "to work together", "to develop further", "to check",
+    "context", "development", "possibility", "difference", "experience",
+    "apparently", "actually", "in particular", "of course", "including",
+    "besides", "consequently", "whereas", "on the other hand", "therefore",
+  ],
+};
+
+/** German word → English (for quiz prompt). Built from DEFAULT_VOCABULARY + DEFAULT_ENGLISH. */
+const GERMAN_TO_ENGLISH: Record<string, string> = (() => {
+  const map: Record<string, string> = {};
+  for (const level of LEVELS) {
+    const words = DEFAULT_VOCABULARY[level];
+    const english = DEFAULT_ENGLISH[level];
+    words.forEach((w, i) => {
+      if (english[i]) map[w] = english[i];
+    });
+  }
+  return map;
+})();
+
 function shuffle<T>(arr: T[]): T[] {
   const out = [...arr];
   for (let i = out.length - 1; i > 0; i--) {
@@ -41,13 +77,6 @@ function shuffle<T>(arr: T[]): T[] {
     [out[i], out[j]] = [out[j], out[i]];
   }
   return out;
-}
-
-/** Placeholder image as data URL. Replace with AI-generated image when API key is available. */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- param kept for future AI image by word
-function placeholderImageUrl(word: string): string {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect fill="#1a1a1a" width="200" height="200"/><text x="100" y="100" text-anchor="middle" dy="0.35em" fill="#fff" font-family="system-ui" font-size="18">?</text></svg>`;
-  return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
 }
 
 export async function POST(req: Request) {
@@ -116,8 +145,10 @@ export async function POST(req: Request) {
     const shuffled = shuffle(words);
     const selected = shuffled.slice(0, 10);
     const rest = shuffled.slice(10);
+
     const questions = selected.map((item, index) => {
       const correctWord = item.word;
+      const promptEnglish = GERMAN_TO_ENGLISH[correctWord] ?? correctWord;
       const others = rest
         .filter((w) => w.word !== correctWord)
         .slice(0, 3)
@@ -131,7 +162,7 @@ export async function POST(req: Request) {
       return {
         id: `v-${level}-${index}-${item.id}`,
         word: correctWord,
-        imageUrl: placeholderImageUrl(correctWord),
+        promptEnglish,
         options: options.map((text, optIndex) => ({ text, index: optIndex })),
         correctIndex: options.indexOf(correctWord),
       };
@@ -143,7 +174,7 @@ export async function POST(req: Request) {
       questions: questions.map((q) => ({
         id: q.id,
         word: q.word,
-        imageUrl: q.imageUrl,
+        promptEnglish: q.promptEnglish,
         options: q.options,
         correctIndices: [q.correctIndex],
       })),

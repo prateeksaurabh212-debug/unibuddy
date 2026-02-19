@@ -16,7 +16,7 @@ const LEVELS = ["A1", "A2", "B1", "B2"] as const;
 type VocabQuestion = {
   id: string;
   word: string;
-  imageUrl: string;
+  promptEnglish: string;
   options: { text: string; index: number }[];
   correctIndices: number[];
 };
@@ -54,10 +54,10 @@ export default function VocabularyQuizPage() {
           return;
         }
         setQuestions(
-          data.questions.map((q: { id: string; word: string; imageUrl: string; options: { text: string; index: number }[]; correctIndices: number[] }) => ({
+          data.questions.map((q: { id: string; word: string; promptEnglish: string; options: { text: string; index: number }[]; correctIndices: number[] }) => ({
             id: q.id,
             word: q.word,
-            imageUrl: q.imageUrl,
+            promptEnglish: q.promptEnglish ?? q.word,
             options: q.options,
             correctIndices: q.correctIndices,
           }))
@@ -165,13 +165,9 @@ export default function VocabularyQuizPage() {
             <CardTitle className="text-base">{t("learnGerman.selectWord")}</CardTitle>
           </CardHeader>
           <CardContent className="flex min-h-0 flex-1 flex-col gap-4 overflow-auto">
-            <div className="flex justify-center rounded-lg border border-white/10 bg-muted/30 p-4">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={q.imageUrl}
-                alt=""
-                className="max-h-48 w-auto max-w-full object-contain"
-              />
+            <div className="rounded-lg border border-white/10 bg-muted/30 p-4 text-center">
+              <p className="text-sm text-muted-foreground">{t("learnGerman.selectGermanFor")}</p>
+              <p className="mt-2 text-2xl font-semibold">{q.promptEnglish}</p>
             </div>
             <div className="grid gap-2 sm:grid-cols-2">
               {q.options.map((opt) => (
