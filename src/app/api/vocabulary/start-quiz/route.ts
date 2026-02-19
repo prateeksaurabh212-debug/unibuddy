@@ -107,27 +107,25 @@ export async function POST(req: Request) {
 
     const shuffled = shuffle(withEnglish);
     const selected = shuffled.slice(0, 10);
-    const rest = shuffled.slice(10);
 
-    const allOptionWords: string[] = [];
+    // For each question, pick 3 wrong options by random sample from the entire level word list
+    // (excluding the correct answer) so incorrect options vary from question to question.
     const questionOptionWords: string[][] = [];
     for (let i = 0; i < selected.length; i++) {
       const correctWord = selected[i].word;
-      const othersList = rest
-        .filter((w) => w.word !== correctWord)
-        .slice(0, 3)
-        .map((w) => w.word);
+      const wrongCandidates = shuffle(
+        withEnglish.filter((w) => w.word !== correctWord).map((w) => w.word)
+      );
+      const othersList = wrongCandidates.slice(0, 3);
       if (othersList.length < 3) {
-        const pool = shuffled.filter((w) => w.word !== correctWord && !othersList.includes(w.word));
-        while (othersList.length < 3 && pool.length > 0) {
-          const extra = pool.find((w) => !othersList.includes(w.word));
-          if (extra) othersList.push(extra.word);
-          else break;
-        }
+        const pool = withEnglish
+          .filter((w) => w.word !== correctWord && !othersList.includes(w.word))
+          .map((w) => w.word);
+        const extra = shuffle(pool).slice(0, 3 - othersList.length);
+        othersList.push(...extra);
       }
       const optionWords = [correctWord, ...othersList.slice(0, 3)];
       questionOptionWords.push(optionWords);
-      allOptionWords.push(...optionWords);
     }
 
     const displayFormByWord: Record<string, string> = {};
