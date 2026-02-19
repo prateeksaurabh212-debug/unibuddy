@@ -1,10 +1,12 @@
 /**
  * Sync vocabulary from the 4 fixed PDFs (content/vocabulary/A1.pdf … B2.pdf)
- * into the VocabularyWord table. Run after adding or updating those PDFs:
+ * into the VocabularyWord table and translate them (english + displayForm).
+ * Runs at build time (e.g. on Vercel) so the DB is fully populated on deploy.
  *
  *   npm run sync-vocabulary
  *
  * Requires DIRECT_DATABASE_URL or DATABASE_URL (load from .env / .env.local).
+ * Optional: OPENAI_API_KEY for translation; if missing, words are synced but not translated (log warning).
  */
 
 import { config } from "dotenv";
@@ -18,6 +20,7 @@ if (existsSync(join(process.cwd(), ".env.local"))) {
 import { PDFParse } from "pdf-parse";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { translateAndStoreVocabulary } from "../src/lib/vocabulary-translate";
 
 const dbUrl = process.env.DIRECT_DATABASE_URL ?? process.env.DATABASE_URL;
 if (!dbUrl) {
@@ -83,6 +86,23 @@ async function main() {
       skipDuplicates: true,
     });
     console.log(`${level}: ${words.length} words synced from ${level}.pdf`);
+  }
+
+  // Translate all words that have no english yet (populate english + displayForm at build time).
+  const toTranslate = await prisma.vocabularyWord.findMany({
+    where: { english: null },
+    select: { id: true, word: true },
+  });
+  if (toTranslate.length === 0) {
+    console.log("No words to translate (all already have english).");
+  } else if (!process.env.OPENAI_API_KEY?.trim()) {
+    console.warn(
+      "OPENAI_API_KEY not set: skipping translation. Set it in Vercel Build env (and redeploy) to populate english/displayForm at build time."
+    );
+  } else {
+    console.log(`Translating ${toTranslate.length} words...`);
+    const result = await translateAndStoreVocabulary(toTranslate, prisma);
+    console.log(`Translation done: ${result.translated} translated, ${result.failed} failed.`);
   }
 
   await prisma.$disconnect();

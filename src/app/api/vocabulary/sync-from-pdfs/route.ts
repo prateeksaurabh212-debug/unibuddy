@@ -1,7 +1,7 @@
 /**
- * Sync vocabulary from the 4 fixed PDFs (content/vocabulary/A1.pdf … B2.pdf) into the DB.
- * GET or POST (authenticated). GET is supported as a workaround when POST returns 405 in production.
- * Heavy deps are loaded inside the handler so import-time errors are caught and returned as JSON.
+ * Sync vocabulary from the 4 fixed PDFs (content/vocabulary/A1.pdf … B2.pdf) into the DB only (no translation).
+ * Translation runs at build time via scripts/sync-vocabulary-from-pdfs.ts. Use "Translate missing" in the UI for one-off backfills.
+ * GET or POST (authenticated). GET supported as workaround when POST returns 405 in production.
  */
 
 import { NextResponse } from "next/server";
@@ -58,13 +58,10 @@ async function extractTextFromPdfBuffer(data: Uint8Array): Promise<string> {
 
 async function runSync(): Promise<NextResponse> {
   try {
-    const [{ prisma }, { translateAndStoreVocabulary }] = await Promise.all([
-      import("@/lib/prisma").then((m) => ({ prisma: m.prisma })),
-      import("@/lib/vocabulary-translate").then((m) => ({ translateAndStoreVocabulary: m.translateAndStoreVocabulary })),
-    ]);
+    const { prisma } = await import("@/lib/prisma");
 
     const contentDir = join(process.cwd(), "content", "vocabulary");
-    const results: { level: string; count: number; error?: string; translated?: number }[] = [];
+    const results: { level: string; count: number; error?: string }[] = [];
 
     for (const level of LEVELS) {
       try {
@@ -89,16 +86,7 @@ async function runSync(): Promise<NextResponse> {
           data: words.map((word) => ({ level, word })),
           skipDuplicates: true,
         });
-        const rows = await prisma.vocabularyWord.findMany({
-          where: { level },
-          select: { id: true, word: true },
-        });
-        const { translated } = await translateAndStoreVocabulary(rows);
-        results.push({
-          level,
-          count: words.length,
-          translated: translated > 0 ? translated : undefined,
-        });
+        results.push({ level, count: words.length });
       } catch (levelError) {
         console.error(`vocabulary/sync-from-pdfs ${level} error:`, levelError);
         results.push({

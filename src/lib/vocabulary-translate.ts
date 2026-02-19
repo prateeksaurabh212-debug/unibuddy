@@ -1,9 +1,10 @@
 /**
  * One-time translation and storage for vocabulary words.
  * Translates German → English and gets display form (der/die/das for nouns).
- * Used after sync-from-pdfs and by translate-missing API.
+ * Used at build time (sync-vocabulary script), by sync-from-pdfs API (sync only), and translate-missing API.
  */
 
+import type { PrismaClient } from "@prisma/client";
 import OpenAI from "openai";
 import { prisma } from "@/lib/prisma";
 
@@ -52,15 +53,19 @@ export type VocabularyRecord = { id: string; word: string };
 /**
  * Translate words in batches and update DB (english + displayForm).
  * Skips if OPENAI_API_KEY is missing. Returns counts.
+ * @param records - Words to translate (id, word).
+ * @param prismaInstance - Optional Prisma client (e.g. from build script); uses default app prisma if omitted.
  */
 export async function translateAndStoreVocabulary(
-  records: VocabularyRecord[]
+  records: VocabularyRecord[],
+  prismaInstance?: PrismaClient
 ): Promise<{ translated: number; failed: number; skipped: number }> {
   const apiKey = process.env.OPENAI_API_KEY?.trim();
   if (!apiKey || records.length === 0) {
     return { translated: 0, failed: 0, skipped: records.length };
   }
 
+  const db = prismaInstance ?? prisma;
   const openai = new OpenAI({ apiKey });
   let translated = 0;
   let failed = 0;
@@ -81,7 +86,7 @@ export async function translateAndStoreVocabulary(
         continue;
       }
       try {
-        await prisma.vocabularyWord.update({
+        await db.vocabularyWord.update({
           where: { id },
           data: { english, displayForm },
         });
