@@ -40,10 +40,25 @@ function extractWords(text: string): string[] {
   return Array.from(wordSet);
 }
 
+/** Extract text from a PDF buffer using pdfjs-serverless (Node/serverless-safe, no DOMMatrix). */
+async function extractTextFromPdfBuffer(data: Uint8Array): Promise<string> {
+  const { getDocument } = await import("pdfjs-serverless");
+  const doc = await getDocument({ data, useSystemFonts: true }).promise;
+  const parts: string[] = [];
+  for (let i = 1; i <= doc.numPages; i++) {
+    const page = await doc.getPage(i);
+    const textContent = await page.getTextContent();
+    const pageText = textContent.items
+      .map((item) => ("str" in item ? item.str : ""))
+      .join(" ");
+    parts.push(pageText);
+  }
+  return parts.join(" ").trim();
+}
+
 async function runSync(): Promise<NextResponse> {
   try {
-    const [{ PDFParse }, { prisma }, { translateAndStoreVocabulary }] = await Promise.all([
-      import("pdf-parse"),
+    const [{ prisma }, { translateAndStoreVocabulary }] = await Promise.all([
       import("@/lib/prisma").then((m) => ({ prisma: m.prisma })),
       import("@/lib/vocabulary-translate").then((m) => ({ translateAndStoreVocabulary: m.translateAndStoreVocabulary })),
     ]);
@@ -59,11 +74,7 @@ async function runSync(): Promise<NextResponse> {
           continue;
         }
         const buffer = readFileSync(path);
-        const parser = new PDFParse({ data: new Uint8Array(buffer) });
-        const result = await parser.getText();
-        await parser.destroy();
-        const raw = typeof result === "string" ? result : (result as { text?: string } | null)?.text ?? "";
-        const text = raw.trim();
+        const text = await extractTextFromPdfBuffer(new Uint8Array(buffer));
         if (!text) {
           results.push({ level, count: 0, error: "No text extracted" });
           continue;
