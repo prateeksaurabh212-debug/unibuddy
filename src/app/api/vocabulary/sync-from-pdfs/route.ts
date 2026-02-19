@@ -12,6 +12,8 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { translateAndStoreVocabulary } from "@/lib/vocabulary-translate";
 
+export const dynamic = "force-dynamic";
+
 const LEVELS = ["A1", "A2", "B1", "B2"] as const;
 
 function extractWords(text: string): string[] {
