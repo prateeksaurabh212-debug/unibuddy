@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import OpenAI from "openai";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -79,6 +80,34 @@ function shuffle<T>(arr: T[]): T[] {
   return out;
 }
 
+/** Translate German words to English via OpenAI (for PDF-sourced words). Returns German -> English map. */
+async function translateToEnglish(germanWords: string[]): Promise<Record<string, string>> {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey?.trim() || germanWords.length === 0) return {};
+
+  try {
+    const openai = new OpenAI({ apiKey });
+    const prompt = `Translate each of these German words to English. Reply with only the English translations, one per line, in the same order. No numbering. Use a short phrase if needed (e.g. "to have", "of course").\n${germanWords.join("\n")}`;
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: prompt }],
+      max_tokens: 300,
+    });
+    const text = completion.choices[0]?.message?.content?.trim();
+    if (!text) return {};
+
+    const lines = text.split("\n").map((s) => s.replace(/^\d+[.)]\s*/, "").trim()).filter(Boolean);
+    const out: Record<string, string> = {};
+    germanWords.forEach((g, i) => {
+      out[g] = lines[i] ?? g;
+    });
+    return out;
+  } catch (e) {
+    console.warn("vocabulary translateToEnglish error:", e);
+    return {};
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -137,28 +166,43 @@ export async function POST(req: Request) {
       );
     }
 
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { creditsBalance: { decrement: creditsRequired } },
-    });
-
     const shuffled = shuffle(words);
     const selected = shuffled.slice(0, 10);
     const rest = shuffled.slice(10);
 
+    const wordsToTranslate = selected.map((item) => item.word);
+    const translated = await translateToEnglish(wordsToTranslate);
+
+    const missing = wordsToTranslate.filter((w) => !translated[w] || translated[w] === w);
+    if (missing.length > 0) {
+      return NextResponse.json(
+        {
+          error:
+            "Translation failed for some words. Set OPENAI_API_KEY and try again.",
+        },
+        { status: 400 }
+      );
+    }
+
     const questions = selected.map((item, index) => {
       const correctWord = item.word;
-      const promptEnglish = GERMAN_TO_ENGLISH[correctWord] ?? correctWord;
+      const promptEnglish = translated[correctWord]!;
       const others = rest
         .filter((w) => w.word !== correctWord)
         .slice(0, 3)
         .map((w) => w.word);
-      while (others.length < 3 && words.length > 4) {
-        const extra = words.find((w) => w.word !== correctWord && !others.includes(w.word));
-        if (extra) others.push(extra.word);
-        else break;
+      let othersList = others;
+      if (others.length < 3) {
+        othersList = [...others];
+        const pool = shuffled.filter((w) => w.word !== correctWord && !othersList.includes(w.word));
+        while (othersList.length < 3 && pool.length > 0) {
+          const extra = pool.find((w) => !othersList.includes(w.word));
+          if (extra) {
+            othersList.push(extra.word);
+          } else break;
+        }
       }
-      const options = shuffle([correctWord, ...others.slice(0, 3)]);
+      const options = shuffle([correctWord, ...othersList.slice(0, 3)]);
       return {
         id: `v-${level}-${index}-${item.id}`,
         word: correctWord,
@@ -166,6 +210,11 @@ export async function POST(req: Request) {
         options: options.map((text, optIndex) => ({ text, index: optIndex })),
         correctIndex: options.indexOf(correctWord),
       };
+    });
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { creditsBalance: { decrement: creditsRequired } },
     });
 
     return NextResponse.json({
