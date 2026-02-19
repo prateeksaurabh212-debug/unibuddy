@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,6 @@ type VocabQuestion = {
 
 export default function VocabularyQuizPage() {
   const params = useParams();
-  const router = useRouter();
   const level = params.level as string;
   const { t } = useLocale();
   const { update: updateSession } = useSession();

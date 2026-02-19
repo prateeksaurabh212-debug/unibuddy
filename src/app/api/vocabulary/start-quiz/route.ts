@@ -20,8 +20,8 @@ function shuffle<T>(arr: T[]): T[] {
   return out;
 }
 
-/** Placeholder image as data URL (word shown as text). Replace with AI-generated image when API key is available. */
-function placeholderImageUrl(word: string): string {
+/** Placeholder image as data URL. Replace with AI-generated image when API key is available. */
+function placeholderImageUrl(_word: string): string {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect fill="#1a1a1a" width="200" height="200"/><text x="100" y="100" text-anchor="middle" dy="0.35em" fill="#fff" font-family="system-ui" font-size="18">?</text></svg>`;
   return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
 }
