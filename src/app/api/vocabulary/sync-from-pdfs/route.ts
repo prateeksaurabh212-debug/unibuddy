@@ -1,6 +1,6 @@
 /**
  * Sync vocabulary from the 4 fixed PDFs (content/vocabulary/A1.pdf … B2.pdf) into the DB.
- * Call POST /api/vocabulary/sync-from-pdfs (authenticated) after adding or updating those PDFs.
+ * GET or POST (authenticated). GET is supported as a workaround when POST returns 405 in production.
  */
 
 import { NextResponse } from "next/server";
@@ -20,7 +20,7 @@ export async function OPTIONS() {
     status: 204,
     headers: {
       "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
       "Access-Control-Max-Age": "86400",
     },
@@ -41,64 +41,83 @@ function extractWords(text: string): string[] {
   return Array.from(wordSet);
 }
 
+async function runSync() {
+  const contentDir = join(process.cwd(), "content", "vocabulary");
+  const results: { level: string; count: number; error?: string; translated?: number }[] = [];
+
+  for (const level of LEVELS) {
+    try {
+      const path = join(contentDir, `${level}.pdf`);
+      if (!existsSync(path)) {
+        results.push({ level, count: 0, error: "PDF not found" });
+        continue;
+      }
+      const buffer = readFileSync(path);
+      const parser = new PDFParse({ data: new Uint8Array(buffer) });
+      const result = await parser.getText();
+      await parser.destroy();
+      const raw = typeof result === "string" ? result : (result as { text?: string } | null)?.text ?? "";
+      const text = raw.trim();
+      if (!text) {
+        results.push({ level, count: 0, error: "No text extracted" });
+        continue;
+      }
+      const words = extractWords(text);
+      if (words.length < 10) {
+        results.push({ level, count: words.length, error: "Need at least 10 words" });
+        continue;
+      }
+      await prisma.vocabularyWord.deleteMany({ where: { level } });
+      await prisma.vocabularyWord.createMany({
+        data: words.map((word) => ({ level, word })),
+        skipDuplicates: true,
+      });
+      const rows = await prisma.vocabularyWord.findMany({
+        where: { level },
+        select: { id: true, word: true },
+      });
+      const { translated } = await translateAndStoreVocabulary(rows);
+      results.push({
+        level,
+        count: words.length,
+        translated: translated > 0 ? translated : undefined,
+      });
+    } catch (levelError) {
+      console.error(`vocabulary/sync-from-pdfs ${level} error:`, levelError);
+      results.push({
+        level,
+        count: 0,
+        error: levelError instanceof Error ? levelError.message : "Failed to process PDF",
+      });
+    }
+  }
+
+  return NextResponse.json({ ok: true, results });
+}
+
+export async function GET() {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    return runSync();
+  } catch (e) {
+    console.error("vocabulary/sync-from-pdfs error:", e);
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : "Sync failed" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST() {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    const contentDir = join(process.cwd(), "content", "vocabulary");
-    const results: { level: string; count: number; error?: string; translated?: number }[] = [];
-
-    for (const level of LEVELS) {
-      try {
-        const path = join(contentDir, `${level}.pdf`);
-        if (!existsSync(path)) {
-          results.push({ level, count: 0, error: "PDF not found" });
-          continue;
-        }
-        const buffer = readFileSync(path);
-        const parser = new PDFParse({ data: new Uint8Array(buffer) });
-        const result = await parser.getText();
-        await parser.destroy();
-        const raw = typeof result === "string" ? result : (result as { text?: string } | null)?.text ?? "";
-        const text = raw.trim();
-        if (!text) {
-          results.push({ level, count: 0, error: "No text extracted" });
-          continue;
-        }
-        const words = extractWords(text);
-        if (words.length < 10) {
-          results.push({ level, count: words.length, error: "Need at least 10 words" });
-          continue;
-        }
-        await prisma.vocabularyWord.deleteMany({ where: { level } });
-        await prisma.vocabularyWord.createMany({
-          data: words.map((word) => ({ level, word })),
-          skipDuplicates: true,
-        });
-        const rows = await prisma.vocabularyWord.findMany({
-          where: { level },
-          select: { id: true, word: true },
-        });
-        const { translated } = await translateAndStoreVocabulary(rows);
-        results.push({
-          level,
-          count: words.length,
-          translated: translated > 0 ? translated : undefined,
-        });
-      } catch (levelError) {
-        console.error(`vocabulary/sync-from-pdfs ${level} error:`, levelError);
-        results.push({
-          level,
-          count: 0,
-          error: levelError instanceof Error ? levelError.message : "Failed to process PDF",
-        });
-      }
-    }
-
-    return NextResponse.json({ ok: true, results });
+    return runSync();
   } catch (e) {
     console.error("vocabulary/sync-from-pdfs error:", e);
     return NextResponse.json(

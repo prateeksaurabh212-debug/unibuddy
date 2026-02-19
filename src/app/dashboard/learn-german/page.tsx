@@ -29,7 +29,7 @@ export default function LearnGermanPage() {
     setSyncResult(null);
     try {
       const res = await fetch("/api/vocabulary/sync-from-pdfs", {
-        method: "POST",
+        method: "GET",
         credentials: "include",
       });
       const text = await res.text();
