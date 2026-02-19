@@ -27,7 +27,11 @@ const SEED_VOCABULARY: Record<string, string[]> = {
 
 async function main() {
   for (const [level, words] of Object.entries(SEED_VOCABULARY)) {
-    await prisma.vocabularyWord.deleteMany({ where: { level } });
+    const count = await prisma.vocabularyWord.count({ where: { level } });
+    if (count > 0) {
+      console.log(`Vocabulary: ${level} – already has ${count} words (e.g. from PDF sync), skipping seed.`);
+      continue;
+    }
     await prisma.vocabularyWord.createMany({
       data: words.map((word) => ({ level, word })),
       skipDuplicates: true,

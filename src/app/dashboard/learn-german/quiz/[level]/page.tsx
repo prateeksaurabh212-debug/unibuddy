@@ -166,7 +166,9 @@ export default function VocabularyQuizPage() {
           </CardHeader>
           <CardContent className="flex min-h-0 flex-1 flex-col gap-4 overflow-auto">
             <div className="rounded-lg border border-white/10 bg-muted/30 p-4 text-center">
-              <p className="text-sm text-muted-foreground">{t("learnGerman.selectGermanFor")}</p>
+              <p className="text-sm text-muted-foreground">
+                {q.promptEnglish === q.word ? t("learnGerman.selectCorrectWord") : t("learnGerman.selectGermanFor")}
+              </p>
               <p className="mt-2 text-2xl font-semibold">{q.promptEnglish}</p>
             </div>
             <div className="grid gap-2 sm:grid-cols-2">

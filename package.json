@@ -7,7 +7,7 @@
     "seed": "npx prisma db seed",
     "sync-vocabulary": "npx tsx scripts/sync-vocabulary-from-pdfs.ts",
     "dev": "next dev",
-    "build": "prisma migrate deploy && prisma db seed && next build",
+    "build": "prisma migrate deploy && prisma db seed && npm run sync-vocabulary && next build",
     "start": "next start",
     "lint": "next lint"
   },
