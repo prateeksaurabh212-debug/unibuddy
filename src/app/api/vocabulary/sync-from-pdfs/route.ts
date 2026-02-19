@@ -3,7 +3,7 @@
  * Call POST /api/vocabulary/sync-from-pdfs (authenticated) after adding or updating those PDFs.
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { readFileSync, existsSync } from "fs";
 import { join } from "path";
@@ -15,7 +15,7 @@ import { translateAndStoreVocabulary } from "@/lib/vocabulary-translate";
 export const dynamic = "force-dynamic";
 
 /** Handle CORS preflight so POST with JSON can be sent. */
-export async function OPTIONS(_req: NextRequest) {
+export async function OPTIONS() {
   return new NextResponse(null, {
     status: 204,
     headers: {

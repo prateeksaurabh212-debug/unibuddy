@@ -3,13 +3,13 @@
  * POST (authenticated). Requires OPENAI_API_KEY.
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { translateAndStoreVocabulary } from "@/lib/vocabulary-translate";
 
-export async function OPTIONS(_req: NextRequest) {
+export async function OPTIONS() {
   return new NextResponse(null, {
     status: 204,
     headers: {
