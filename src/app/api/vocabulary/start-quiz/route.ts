@@ -181,7 +181,7 @@ export async function POST(req: Request) {
     const questionOptionWords: string[][] = [];
     for (let i = 0; i < selected.length; i++) {
       const correctWord = selected[i].word;
-      let othersList = rest
+      const othersList = rest
         .filter((w) => w.word !== correctWord)
         .slice(0, 3)
         .map((w) => w.word);
