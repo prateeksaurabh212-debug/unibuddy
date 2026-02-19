@@ -36,32 +36,41 @@ export async function POST() {
     const results: { level: string; count: number; error?: string }[] = [];
 
     for (const level of LEVELS) {
-      const path = join(contentDir, `${level}.pdf`);
-      if (!existsSync(path)) {
-        results.push({ level, count: 0, error: "PDF not found" });
-        continue;
+      try {
+        const path = join(contentDir, `${level}.pdf`);
+        if (!existsSync(path)) {
+          results.push({ level, count: 0, error: "PDF not found" });
+          continue;
+        }
+        const buffer = readFileSync(path);
+        const parser = new PDFParse({ data: new Uint8Array(buffer) });
+        const result = await parser.getText();
+        await parser.destroy();
+        const raw = typeof result === "string" ? result : (result as { text?: string } | null)?.text ?? "";
+        const text = raw.trim();
+        if (!text) {
+          results.push({ level, count: 0, error: "No text extracted" });
+          continue;
+        }
+        const words = extractWords(text);
+        if (words.length < 10) {
+          results.push({ level, count: words.length, error: "Need at least 10 words" });
+          continue;
+        }
+        await prisma.vocabularyWord.deleteMany({ where: { level } });
+        await prisma.vocabularyWord.createMany({
+          data: words.map((word) => ({ level, word })),
+          skipDuplicates: true,
+        });
+        results.push({ level, count: words.length });
+      } catch (levelError) {
+        console.error(`vocabulary/sync-from-pdfs ${level} error:`, levelError);
+        results.push({
+          level,
+          count: 0,
+          error: levelError instanceof Error ? levelError.message : "Failed to process PDF",
+        });
       }
-      const buffer = readFileSync(path);
-      const parser = new PDFParse({ data: new Uint8Array(buffer) });
-      const result = await parser.getText();
-      await parser.destroy();
-      const raw = typeof result === "string" ? result : (result as { text?: string } | null)?.text ?? "";
-      const text = raw.trim();
-      if (!text) {
-        results.push({ level, count: 0, error: "No text extracted" });
-        continue;
-      }
-      const words = extractWords(text);
-      if (words.length < 10) {
-        results.push({ level, count: words.length, error: "Need at least 10 words" });
-        continue;
-      }
-      await prisma.vocabularyWord.deleteMany({ where: { level } });
-      await prisma.vocabularyWord.createMany({
-        data: words.map((word) => ({ level, word })),
-        skipDuplicates: true,
-      });
-      results.push({ level, count: words.length });
     }
 
     return NextResponse.json({ ok: true, results });

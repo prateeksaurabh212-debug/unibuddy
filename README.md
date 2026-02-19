@@ -64,3 +64,12 @@ npm start
 ```
 
 Requires `OPENAI_API_KEY` at runtime for the API routes; build succeeds without it.
+
+## Deploy (Vercel)
+
+1. **Environment variables** – In Vercel: **Project → Settings → Environment Variables**, add:
+   - `DATABASE_URL` (or `DIRECT_DATABASE_URL`) – your Postgres connection string.  
+     **Enable for both "Build" and "Runtime"** so `prisma migrate deploy` and `prisma db seed` can run during build and the app can connect at runtime.
+   - `NEXTAUTH_SECRET`, `NEXTAUTH_URL` (e.g. `https://your-app.vercel.app`), `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `OWNER_EMAIL`, `NEXT_PUBLIC_OWNER_EMAIL`, `OPENAI_API_KEY` as needed (Runtime is enough for these; add to Build too if any are used at build time).
+
+2. **Build** – The default `npm run build` runs `prisma migrate deploy && prisma db seed && next build`, so the DB is migrated and vocabulary is seeded on each deploy.
