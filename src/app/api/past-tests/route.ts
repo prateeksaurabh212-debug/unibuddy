@@ -53,7 +53,7 @@ export async function POST(req: Request) {
     const body = (await req.json()) as {
       moduleId: string;
       moduleName: string;
-      testType: "mcq" | "short_form" | "long_form";
+      testType: "mcq" | "short_form" | "long_form" | "vocabulary";
       resultData: string;
     };
     const { moduleId, moduleName, testType, resultData } = body;
@@ -63,9 +63,9 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
-    if (!["mcq", "short_form", "long_form"].includes(testType)) {
+    if (!["mcq", "short_form", "long_form", "vocabulary"].includes(testType)) {
       return NextResponse.json(
-        { error: "testType must be mcq, short_form, or long_form" },
+        { error: "testType must be mcq, short_form, long_form, or vocabulary" },
         { status: 400 }
       );
     }

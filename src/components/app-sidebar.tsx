@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { BookOpen, ClipboardList, LayoutDashboard, Users } from "lucide-react";
+import { BookOpen, ClipboardList, GraduationCap, LayoutDashboard, Users } from "lucide-react";
 import { SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 import { useLocale } from "@/contexts/LocaleContext";
 
@@ -18,6 +18,7 @@ export function AppSidebar() {
   const navItems = [
     { titleKey: "sidebar.myModules", href: "/dashboard/modules", icon: BookOpen },
     { titleKey: "sidebar.myPastTests", href: "/dashboard/past-tests", icon: ClipboardList },
+    { titleKey: "sidebar.learnGerman", href: "/dashboard/learn-german", icon: GraduationCap },
   ];
 
   return (

@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { BookOpen, ArrowRight, ClipboardList, Star } from "lucide-react";
+import { BookOpen, ArrowRight, ClipboardList, GraduationCap, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PricingSection } from "@/components/pricing-section";
@@ -41,6 +41,8 @@ function Punchline({ text, locale }: { text: string; locale: "en" | "de" }) {
 function LandingContent() {
   const { t, locale } = useLocale();
   const signInBase = "/auth/signin";
+  // After first-time login/signup, always land on dashboard home (not upload PDF)
+  const signInCallback = encodeURIComponent("/dashboard");
 
   return (
     <div className="min-h-screen bg-grid-subtle">
@@ -73,7 +75,7 @@ function LandingContent() {
               {t("dashboard.heroSub")}
             </p>
             <Button asChild size="lg" className="mt-4">
-              <Link href={`${signInBase}?callbackUrl=${encodeURIComponent("/dashboard/modules/new")}`}>
+              <Link href={`${signInBase}?callbackUrl=${signInCallback}`}>
                 {t("dashboard.createFirstQuiz")}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
@@ -93,9 +95,9 @@ function LandingContent() {
           <h2 className="mb-10 text-2xl font-semibold tracking-tight sm:text-3xl">
             {t("dashboard.whereNext")}
           </h2>
-          <div className="grid gap-8 sm:grid-cols-1 md:grid-cols-2">
+          <div className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             <Card className="group transition-all hover:shadow-md">
-              <Link href={`${signInBase}?callbackUrl=${encodeURIComponent("/dashboard/modules")}`} className="block">
+              <Link href={`${signInBase}?callbackUrl=${signInCallback}`} className="block">
                 <CardHeader className="pb-2">
                   <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
                     <BookOpen className="h-6 w-6" />
@@ -112,7 +114,7 @@ function LandingContent() {
               </Link>
             </Card>
             <Card className="group transition-all hover:shadow-md">
-              <Link href={`${signInBase}?callbackUrl=${encodeURIComponent("/dashboard/past-tests")}`} className="block">
+              <Link href={`${signInBase}?callbackUrl=${signInCallback}`} className="block">
                 <CardHeader className="pb-2">
                   <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
                     <ClipboardList className="h-6 w-6" />
@@ -123,6 +125,23 @@ function LandingContent() {
                 <CardContent>
                   <span className="inline-flex text-sm font-medium text-primary group-hover:underline">
                     {t("dashboard.openMyPastTests")}
+                    <ArrowRight className="ml-1 h-4 w-4" />
+                  </span>
+                </CardContent>
+              </Link>
+            </Card>
+            <Card className="group transition-all hover:shadow-md">
+              <Link href={`${signInBase}?callbackUrl=${signInCallback}`} className="block">
+                <CardHeader className="pb-2">
+                  <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <GraduationCap className="h-6 w-6" />
+                  </div>
+                  <CardTitle className="text-lg">{t("dashboard.learnGerman")}</CardTitle>
+                  <CardDescription>{t("dashboard.learnGermanDesc")}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <span className="inline-flex text-sm font-medium text-primary group-hover:underline">
+                    {t("dashboard.openLearnGerman")}
                     <ArrowRight className="ml-1 h-4 w-4" />
                   </span>
                 </CardContent>

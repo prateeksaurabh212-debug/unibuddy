@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { BookOpen, ArrowRight, ClipboardList, Star } from "lucide-react";
+import { BookOpen, ArrowRight, ClipboardList, GraduationCap, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PricingSection } from "@/components/pricing-section";
@@ -71,7 +71,7 @@ export default function DashboardPage() {
 
       <section>
         <h2 className="mb-10 text-2xl font-semibold tracking-tight sm:text-3xl">{t("dashboard.whereNext")}</h2>
-        <div className="grid gap-8 sm:grid-cols-1 md:grid-cols-2">
+        <div className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           <Card className="group transition-all hover:shadow-md">
             <Link href="/dashboard/modules" className="block">
               <CardHeader className="pb-2">
@@ -101,6 +101,23 @@ export default function DashboardPage() {
               <CardContent>
                 <span className="inline-flex items-center text-sm font-medium text-primary group-hover:underline">
                   {t("dashboard.openMyPastTests")}
+                  <ArrowRight className="ml-1 h-4 w-4" />
+                </span>
+              </CardContent>
+            </Link>
+          </Card>
+          <Card className="group transition-all hover:shadow-md">
+            <Link href="/dashboard/learn-german" className="block">
+              <CardHeader className="pb-2">
+                <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <GraduationCap className="h-6 w-6" />
+                </div>
+                <CardTitle className="text-lg">{t("dashboard.learnGerman")}</CardTitle>
+                <CardDescription>{t("dashboard.learnGermanDesc")}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <span className="inline-flex items-center text-sm font-medium text-primary group-hover:underline">
+                  {t("dashboard.openLearnGerman")}
                   <ArrowRight className="ml-1 h-4 w-4" />
                 </span>
               </CardContent>

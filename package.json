@@ -4,14 +4,20 @@
   "private": true,
   "scripts": {
     "postinstall": "prisma generate",
+    "seed": "npx prisma db seed",
+    "sync-vocabulary": "npx tsx scripts/sync-vocabulary-from-pdfs.ts",
     "dev": "next dev",
     "build": "prisma migrate deploy && next build",
     "start": "next start",
     "lint": "next lint"
   },
+  "prisma": {
+    "seed": "npx tsx prisma/seed.ts"
+  },
   "dependencies": {
     "@next-auth/prisma-adapter": "^1.0.7",
     "@prisma/adapter-better-sqlite3": "^7.3.0",
+    "@prisma/adapter-pg": "^7.4.0",
     "@prisma/client": "^7.3.0",
     "@prisma/extension-accelerate": "^3.0.1",
     "@radix-ui/react-avatar": "^1.1.11",
@@ -34,6 +40,7 @@
     "openai": "^6.18.0",
     "pdf-parse": "^2.4.5",
     "pdfjs-dist": "5.3.93",
+    "pg": "^8.18.0",
     "react": "^18",
     "react-dom": "^18",
     "react-dropzone": "^14.4.0",

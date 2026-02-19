@@ -59,6 +59,8 @@ export default function PastTestsPage() {
     if (type === "mcq") return t("pastTests.testTypeMcq");
     if (type === "short_form") return t("pastTests.testTypeShort");
     if (type === "long_form") return t("pastTests.testTypeLong");
+    if (type === "vocabulary") return t("pastTests.testTypeVocabulary");
+    return type;
     return type;
   }
 

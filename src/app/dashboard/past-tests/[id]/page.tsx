@@ -74,6 +74,73 @@ export default function PastTestResultPage() {
   }
 
   const isMcq = attempt.testType === "mcq";
+  const isVocabulary = attempt.testType === "vocabulary";
+
+  if (isVocabulary) {
+    let vData: { questions?: { id: string; word: string; correctIndices: number[] }; answers?: Record<string, number> };
+    try {
+      vData = JSON.parse(attempt.resultData) as typeof vData;
+    } catch {
+      return (
+        <div className="flex flex-col items-center justify-center py-16">
+          <p className="text-muted-foreground">Invalid result data.</p>
+          <Button asChild variant="link" className="mt-2">
+            <Link href="/dashboard/past-tests">{t("pastTests.backToPastTests")}</Link>
+          </Button>
+        </div>
+      );
+    }
+    const vQuestions = vData.questions ?? [];
+    const vAnswers = vData.answers ?? {};
+    if (vQuestions.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-16">
+          <p className="text-muted-foreground">No questions in this attempt.</p>
+          <Button asChild variant="link" className="mt-2">
+            <Link href="/dashboard/past-tests">{t("pastTests.backToPastTests")}</Link>
+          </Button>
+        </div>
+      );
+    }
+    let vCorrect = 0;
+    vQuestions.forEach((q) => {
+      const sel = vAnswers[q.id];
+      if (sel !== undefined && q.correctIndices.includes(sel)) vCorrect += 1;
+    });
+    const vPercentage = (vCorrect / vQuestions.length) * 100;
+    const vGrade = percentageToGermanGrade(vPercentage);
+    const vLabel = getGradeLabel(vGrade);
+
+    return (
+      <div className="mx-auto max-w-2xl space-y-6 py-8">
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" className="shrink-0" asChild>
+            <Link href="/dashboard/past-tests">
+              <ArrowLeft className="h-4 w-4" />
+            </Link>
+          </Button>
+          <h1 className="text-lg font-medium text-muted-foreground truncate">
+            {testDisplayName(attempt.completedAt)} · {t("pastTests.testTypeVocabulary")}
+          </h1>
+        </div>
+        <Card className="border-2">
+          <CardHeader>
+            <CardTitle className="text-center text-3xl">
+              {vLabel} ({vGrade.toFixed(1)})
+            </CardTitle>
+            <CardDescription className="text-center">
+              {vCorrect} / {vQuestions.length} correct · {vPercentage.toFixed(0)}%
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-center gap-2">
+            <Button asChild>
+              <Link href="/dashboard/learn-german">{t("pastTests.backToPastTests")}</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (isMcq) {
     let data: { questions?: McqQuestion[]; answers?: Record<string, number[]> };

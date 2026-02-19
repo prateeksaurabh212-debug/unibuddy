@@ -68,3 +68,13 @@ model VerificationToken {
 
   @@id([identifier, token])
 }
+
+// German vocabulary by CEFR level (A1, A2, B1, B2)
+model VocabularyWord {
+  id        String   @id @default(cuid())
+  level     String   // "A1" | "A2" | "B1" | "B2"
+  word      String
+  createdAt DateTime @default(now())
+
+  @@index([level])
+}

@@ -3,7 +3,7 @@ export type Locale = "en" | "de";
 export const translations: Record<
   Locale,
   {
-    sidebar: { navUnibuddy: string; navNavigate: string; dashboard: string; home: string; myModules: string; myPastTests: string; adminInbox: string; users: string };
+    sidebar: { navUnibuddy: string; navNavigate: string; dashboard: string; home: string; myModules: string; myPastTests: string; learnGerman: string; adminInbox: string; users: string };
     dashboard: {
       punchline: string;
       heroTitle1: string;
@@ -21,6 +21,9 @@ export const translations: Record<
       myPastTests: string;
       myPastTestsDesc: string;
       openMyPastTests: string;
+      learnGerman: string;
+      learnGermanDesc: string;
+      openLearnGerman: string;
       adminInbox: string;
       adminInboxDesc: string;
       openAdminInbox: string;
@@ -173,8 +176,22 @@ export const translations: Record<
       testTypeMcq: string;
       testTypeShort: string;
       testTypeLong: string;
+      testTypeVocabulary: string;
       backToPastTests: string;
       backToHome: string;
+    };
+    learnGerman: {
+      title: string;
+      practiceVocabulary: string;
+      levelA1: string;
+      levelA2: string;
+      levelB1: string;
+      levelB2: string;
+      creditsCost: string;
+      startQuiz: string;
+      selectWord: string;
+      backToLevels: string;
+      notEnoughCredits: string;
     };
     letterScanner: {
       title: string;
@@ -203,6 +220,7 @@ export const translations: Record<
       home: "Home",
       myModules: "My Modules",
       myPastTests: "My Past tests",
+      learnGerman: "Learn German",
       adminInbox: "Admin Inbox",
       users: "Users",
     },
@@ -225,6 +243,9 @@ export const translations: Record<
       myPastTests: "My Past tests",
       myPastTestsDesc: "View results and review your previous MCQ and written tests.",
       openMyPastTests: "Open My Past tests",
+      learnGerman: "Learn German",
+      learnGermanDesc: "Practice vocabulary with image-based quizzes for A1–B2 levels.",
+      openLearnGerman: "Open Learn German",
       adminInbox: "Admin Inbox",
       adminInboxDesc:
         "Scan and decode official letters from your university or authorities—never miss a deadline.",
@@ -383,8 +404,22 @@ export const translations: Record<
       testTypeMcq: "MCQ",
       testTypeShort: "Short form",
       testTypeLong: "Long form",
+      testTypeVocabulary: "Vocabulary",
       backToPastTests: "Back to past tests",
       backToHome: "Back to Home",
+    },
+    learnGerman: {
+      title: "Learn German",
+      practiceVocabulary: "Practice vocabulary",
+      levelA1: "A1",
+      levelA2: "A2",
+      levelB1: "B1",
+      levelB2: "B2",
+      creditsCost: "{{n}} credits",
+      startQuiz: "Start quiz",
+      selectWord: "Select the correct word",
+      backToLevels: "Back to levels",
+      notEnoughCredits: "Not enough credits for this quiz.",
     },
     letterScanner: {
       title: "Admin Inbox",
@@ -413,6 +448,7 @@ export const translations: Record<
       home: "Start",
       myModules: "Meine Module",
       myPastTests: "Meine vergangenen Tests",
+      learnGerman: "Deutsch lernen",
       adminInbox: "Posteingang",
       users: "Nutzer",
     },
@@ -435,6 +471,9 @@ export const translations: Record<
       myPastTests: "Meine vergangenen Tests",
       myPastTestsDesc: "Ergebnisse und Auswertungen deiner bisherigen MCQ- und Schriftlichen Tests.",
       openMyPastTests: "Meine vergangenen Tests öffnen",
+      learnGerman: "Deutsch lernen",
+      learnGermanDesc: "Vokabeln mit Bild-Quizzes für A1–B2 üben.",
+      openLearnGerman: "Deutsch lernen öffnen",
       adminInbox: "Posteingang",
       adminInboxDesc:
         "Offizielle Schreiben von Uni oder Behörden scannen und entschlüsseln—keine Frist verpassen.",
@@ -593,8 +632,22 @@ export const translations: Record<
       testTypeMcq: "MCQ",
       testTypeShort: "Kurzform",
       testTypeLong: "Langform",
+      testTypeVocabulary: "Vokabeln",
       backToPastTests: "Zurück zu vergangenen Tests",
       backToHome: "Zurück zur Startseite",
+    },
+    learnGerman: {
+      title: "Deutsch lernen",
+      practiceVocabulary: "Vokabeln üben",
+      levelA1: "A1",
+      levelA2: "A2",
+      levelB1: "B1",
+      levelB2: "B2",
+      creditsCost: "{{n}} Credits",
+      startQuiz: "Quiz starten",
+      selectWord: "Wähle das richtige Wort",
+      backToLevels: "Zurück zu den Stufen",
+      notEnoughCredits: "Nicht genug Credits für dieses Quiz.",
     },
     letterScanner: {
       title: "Posteingang",

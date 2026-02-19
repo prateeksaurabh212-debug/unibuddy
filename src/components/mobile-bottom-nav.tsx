@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, BookOpen, ClipboardList } from "lucide-react";
+import { LayoutDashboard, BookOpen, ClipboardList, GraduationCap } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, key: "home" as const },
   { href: "/dashboard/modules", icon: BookOpen, key: "myModules" as const },
   { href: "/dashboard/past-tests", icon: ClipboardList, key: "myPastTests" as const },
+  { href: "/dashboard/learn-german", icon: GraduationCap, key: "learnGerman" as const },
 ];
 
 export function MobileBottomNav() {
