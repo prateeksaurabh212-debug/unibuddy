@@ -51,6 +51,9 @@ function LandingContent() {
         <Logo className="shrink-0 text-lg" />
         <div className="flex shrink-0 items-center gap-2">
           <LanguageSwitcher />
+          <Button asChild variant="ghost" size="sm">
+            <Link href="/auth/register">Create account</Link>
+          </Button>
           <Button asChild variant="default" size="sm">
             <Link href={signInBase}>Sign in</Link>
           </Button>

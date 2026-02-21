@@ -15,6 +15,7 @@ model User {
   email              String    @unique
   emailVerified      DateTime?
   image              String?
+  passwordHash       String?   // for email/password sign-in (null for OAuth users)
   creditsBalance       Int       @default(5)
   lastCreditsResetAt   DateTime?
   interestedInPremium  Boolean   @default(false)
